@@ -11,14 +11,24 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
 
-        Parent root = FXMLLoader.load(getClass().getResource("/view/login.fxml"));
+        // ✅ Inicializar BD siempre al arrancar
+        BaseDatos bd = ConexionDB.getInstance();
+        bd.inicializarBD();
 
-        Scene scene = new Scene(root);
+        // Cargar Login
+        FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/fxml/login.fxml")
+        );
+        Parent root = loader.load();
 
-        stage.setTitle("Nufi ☕");
+        Scene scene = new Scene(root, 900, 600);
+        scene.getStylesheets().add(
+                getClass().getResource("/css/nufi-theme.css").toExternalForm()
+        );
 
+        stage.setTitle("NUFI — Finca La Quinta");
         stage.setScene(scene);
-
+        stage.setResizable(false);
         stage.show();
     }
 

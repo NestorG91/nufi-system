@@ -45,7 +45,7 @@ public class BaseDatos {
         }
     }
 
-    //Crear tabla trabajadores y jornadas
+    //Crear tabla trabajadores.fxml y jornadas
     public void crearTablasTrabajadores() {
 
         try {
@@ -83,7 +83,7 @@ public class BaseDatos {
                             FOREIGN KEY (lote_id)
                                 REFERENCES lotes(id))
                     """);
-            System.out.println("✅ Tablas trabajadores y jornadas listas");
+            System.out.println("✅ Tablas trabajadores.fxml y jornadas listas");
         } catch (Exception e) {
             System.out.println("❌ Error: " + e.getMessage());
         }
@@ -219,6 +219,28 @@ public class BaseDatos {
             System.out.println("✅ Tabla usuarios lista");
         } catch (Exception e) {
             System.out.println("❌ Error: " + e.getMessage());
+        }
+    }
+    // Crear usuarios iniciales si no existen
+    public void crearUsuariosIniciales(){
+        try {
+          PreparedStatement check = conexion.prepareStatement(
+                  "SELECT COUNT(*) FROM usuarios"
+          );
+          ResultSet rs = check.executeQuery();
+
+            if (rs.getInt(1) == 0) {
+                // Solo crea si no hay ningún usuario
+                guardarUsuario(new Usuario(
+                        "Nubia Pabuence", "nubia", "nufi2026", "administrador"
+                ));
+                guardarUsuario(new Usuario(
+                        "Filimon Gelvez", "filimon", "nufi2026", "operario"
+                ));
+                System.out.println("✅ Usuarios iniciales creados");
+            }
+        } catch (Exception e) {
+            System.out.println("❌ Error usuarios iniciales: " + e.getMessage());
         }
     }
 
@@ -377,7 +399,7 @@ public class BaseDatos {
         }
     }
 
-    // Listar o mostrar todos los trabajadores
+    // Listar o mostrar todos los trabajadores.fxml
     public void listarTrabajadores() {
         try {
             Statement st = conexion.createStatement();
@@ -388,10 +410,50 @@ public class BaseDatos {
                 System.out.println("  ID: " + rs.getInt("id") + " | Nombre: " + rs.getString("nombre") + " | Cédula: " + rs.getString("cedula") + " | Tel: " + rs.getString("telefono") + " | Dirección: " + rs.getString("direccion"));
             }
         } catch (Exception e) {
-            System.out.println("❌ Error al listar trabajadores: " + e.getMessage());
+            System.out.println("❌ Error al listar trabajadores.fxml: " + e.getMessage());
         }
     }
+    // Obtener lista de trabajadores
+    public java.util.List<Trabajador> obtenerTrabajadores() {
+        java.util.List<Trabajador> lista = new java.util.ArrayList<>();
+        try {
+            Statement st = conexion.createStatement();
+            ResultSet rs = st.executeQuery("SELECT * FROM trabajadores");
+            while (rs.next()) {
+                Trabajador t = new Trabajador(
+                        rs.getString("nombre"),
+                        rs.getString("cedula"),
+                        rs.getString("telefono"),
+                        rs.getString("direccion")
+                );
+                t.id = rs.getInt("id");
+                lista.add(t);
+            }
+        } catch (Exception e) {
+            System.out.println("❌ Error: " + e.getMessage());
+        }
+        return lista;
+    }
 
+    // Actualizar trabajador existente
+    public void actualizarTrabajador(int id, String nombre,
+                                     String cedula, String telefono, String direccion) {
+        try {
+            PreparedStatement ps = conexion.prepareStatement(
+                    "UPDATE trabajadores SET nombre=?, cedula=?, " +
+                            "telefono=?, direccion=? WHERE id=?"
+            );
+            ps.setString(1, nombre);
+            ps.setString(2, cedula);
+            ps.setString(3, telefono);
+            ps.setString(4, direccion);
+            ps.setInt(5, id);
+            ps.executeUpdate();
+            System.out.println("✅ Trabajador actualizado");
+        } catch (Exception e) {
+            System.out.println("❌ Error: " + e.getMessage());
+        }
+    }
     // Guardar una jornada
     public void guardarJornada(Jornada j) {
         try {
@@ -499,6 +561,36 @@ public class BaseDatos {
         } catch (Exception e) {
             System.out.println("❌ Error al listar: " + e.getMessage());
         }
+    }
+
+    // Obtener lotes con kilos cosechados para la tabla
+    public java.util.List<Lote> obtenerLotesConKilos() {
+        java.util.List<Lote> lista = new java.util.ArrayList<>();
+        try {
+            Statement st = conexion.createStatement();
+            ResultSet rs = st.executeQuery(
+                    "SELECT l.id, l.nombre, l.matas, l.fechaSiembra, " +
+                            "COALESCE(SUM(j.kilos), 0) as kilos_cosechados " +
+                            "FROM lotes l " +
+                            "LEFT JOIN jornadas j ON l.id = j.lote_id " +
+                            "AND j.tipo_trabajo = 'recoleccion' " +
+                            "GROUP BY l.id, l.nombre, l.matas, l.fechaSiembra"
+            );
+            while (rs.next()) {
+                Lote lote = new Lote(
+                        rs.getString("nombre"),
+                        rs.getInt("matas"),
+                        rs.getString("fechaSiembra")
+                );
+                lote.id = rs.getInt("id");
+                lote.kilosCosechados = rs.getDouble("kilos_cosechados");
+                lista.add(lote);
+            }
+        } catch (Exception e) {
+            System.out.println("❌ Error obteniendo lotes: "
+                    + e.getMessage());
+        }
+        return lista;
     }
 
     // Generar numero consecutivo de tiquete
@@ -830,7 +922,7 @@ public class BaseDatos {
         }
     }
 
-    // Resumen de trabajadores y jornadas
+    // Resumen de trabajadores.fxml y jornadas
     public String obtenerResumenTrabajadores() {
         try {
             Statement st = conexion.createStatement();
@@ -843,7 +935,7 @@ public class BaseDatos {
             return resumen.toString();
 
         } catch (Exception e) {
-            return "Error al obtener trabajadores: " + e.getMessage();
+            return "Error al obtener trabajadores.fxml: " + e.getMessage();
         }
     }
 
@@ -858,10 +950,10 @@ public class BaseDatos {
                 resumen.append("Cosecha: ").append(rs.getString("nombre")).append(" | Estado: ").append(rs.getString("estado")).append(" | Cereza: ").append(rs.getDouble("total_cereza")).append(" kg").append(" | Est. Pergamino: ").append(String.format("%.1f", rs.getDouble("total_pergamino"))).append(" kg").append("\n");
             }
 
-            // Total pagado a trabajadores
+            // Total pagado a trabajadores.fxml
             ResultSet rs2 = st.executeQuery("SELECT COALESCE(SUM(total_pagar), 0) as total_gastos FROM jornadas");
             if (rs2.next()) {
-                resumen.append("Total gastos trabajadores: $").append(String.format("%,.0f", rs2.getDouble("total_gastos"))).append("\n");
+                resumen.append("Total gastos trabajadores.fxml: $").append(String.format("%,.0f", rs2.getDouble("total_gastos"))).append("\n");
             }
 
             return resumen.toString();
@@ -951,6 +1043,27 @@ public class BaseDatos {
         contexto.append("================================\n");
 
         return contexto.toString();
+    }
+    /**
+     * Inicializa toda la base de datos.
+     * Crea todas las tablas si no existen.
+     * Seguro de llamar siempre al iniciar la app.
+     */
+    public void inicializarBD() {
+        crearTabla();                  // lotes
+        crearTablasTrabajadores();     // trabajadores.fxml + jornadas
+        crearTablasInventario();       // productos_bodega + movimientos_bodega
+        crearTablaTiquetes();          // tiquetes
+        crearTablasCosecha();          // cosecha + cosecha_lotes
+        crearTablaUsuarios();          // usuarios
+        crearTablaChatHistorial();     // chat_historial
+        crearUsuariosIniciales();      // crear usuarios
+        System.out.println("✅ Base de datos NUFI inicializada correctamente");
+    }
+
+    // Exponer conexión para consultas directas
+    public java.sql.Connection getConexion() {
+        return conexion;
     }
 
     // Cerrar conexión

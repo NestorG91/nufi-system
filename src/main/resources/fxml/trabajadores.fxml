@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.nufi.ui.controllers.TrabajadoresController"
+      spacing="16">
+
+    <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
+
+    <!-- ══ ENCABEZADO ══ -->
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <Label text="👷 Gestión de Trabajadores"
+               styleClass="label-titulo"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="+ Nuevo Trabajador"
+                styleClass="btn-primary"
+                onAction="#abrirFormularioNuevo"/>
+    </HBox>
+
+    <!-- ══ TABLA ══ -->
+    <TableView fx:id="tablaTrabajadores"
+               VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colId"
+                         text="ID" prefWidth="60"/>
+            <TableColumn fx:id="colNombre"
+                         text="Nombre" prefWidth="180"/>
+            <TableColumn fx:id="colCedula"
+                         text="Cédula" prefWidth="130"/>
+            <TableColumn fx:id="colTelefono"
+                         text="Teléfono" prefWidth="130"/>
+            <TableColumn fx:id="colDireccion"
+                         text="Dirección" prefWidth="200"/>
+            <TableColumn fx:id="colAcciones"
+                         text="Acciones" prefWidth="150"/>
+        </columns>
+    </TableView>
+
+    <!-- ══ FORMULARIO ══ -->
+    <VBox fx:id="panelFormulario"
+          styleClass="card"
+          spacing="12"
+          visible="false"
+          managed="false">
+
+        <Label text="Datos del Trabajador"
+               styleClass="card-titulo"/>
+
+        <HBox spacing="12">
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Nombre completo:"/>
+                <TextField fx:id="txtNombre"
+                           promptText="Ej: Carlos Rueda"
+                           styleClass="nufi-input"/>
+            </VBox>
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Cédula:"/>
+                <TextField fx:id="txtCedula"
+                           promptText="Ej: 12345678"
+                           styleClass="nufi-input"/>
+            </VBox>
+        </HBox>
+
+        <HBox spacing="12">
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Teléfono:"/>
+                <TextField fx:id="txtTelefono"
+                           promptText="Ej: 3101234567"
+                           styleClass="nufi-input"/>
+            </VBox>
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Dirección:"/>
+                <TextField fx:id="txtDireccion"
+                           promptText="Ej: Vereda Albania"
+                           styleClass="nufi-input"/>
+            </VBox>
+        </HBox>
+
+        <Label fx:id="lblError"
+               styleClass="label-error"
+               visible="false"
+               managed="false"/>
+
+        <HBox spacing="8">
+            <Button text="💾 Guardar"
+                    styleClass="btn-primary"
+                    onAction="#guardarTrabajador"/>
+            <Button text="Cancelar"
+                    styleClass="btn-secondary"
+                    onAction="#cancelar"/>
+        </HBox>
+    </VBox>
+
+</VBox>

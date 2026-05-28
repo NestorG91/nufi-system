@@ -1,0 +1,324 @@
+/* ═══════════════════════════════════════
+   NUFI Theme — Finca La Quinta
+   Colores cafeteros: verde selva + café
+   ═══════════════════════════════════════ */
+
+/* ── Paleta ── */
+* {
+    -nufi-verde:       #2d6a4f;
+    -nufi-verde-dark:  #1b4332;
+    -nufi-verde-light: #52b788;
+    -nufi-cafe:        #6f4e37;
+    -nufi-crema:       #f8f4ef;
+    -nufi-gris:        #f0f0f0;
+    -nufi-texto:       #2c2c2c;
+    -nufi-muted:       #888888;
+    -nufi-danger:      #c1121f;
+    -nufi-warning:     #e9c46a;
+}
+
+/* ── ROOT ── */
+.root {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 13px;
+    -fx-background-color: #f8f4ef;
+}
+
+/* ══════════════════════════════
+   LOGIN
+   ══════════════════════════════ */
+.login-bg {
+    -fx-background-color: linear-gradient(
+            to bottom right,
+            #1b4332,
+            #2d6a4f,
+            #52b788
+    );
+}
+
+.login-card {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 20, 0, 0, 8);
+    -fx-padding: 40 50 40 50;
+    -fx-max-width: 420;
+}
+
+.login-title {
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-fill: #2d6a4f;
+}
+
+.login-subtitle {
+    -fx-font-size: 12px;
+    -fx-fill: #888;
+}
+
+/* ══════════════════════════════
+   SIDEBAR
+   ══════════════════════════════ */
+.sidebar {
+    -fx-background-color: #1b4332;
+    -fx-pref-width: 220px;
+    -fx-min-width: 220px;
+}
+
+.sidebar-section-label {
+    -fx-text-fill: #52b788;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 8 8 4 8;
+}
+
+.sidebar-footer {
+    -fx-text-fill: #52b788;
+    -fx-font-size: 10px;
+    -fx-padding: 8;
+}
+
+.nav-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #b7e4c7;
+    -fx-font-size: 13px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 10 12;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-max-width: Infinity;
+}
+
+.nav-btn:hover {
+    -fx-background-color: #2d6a4f;
+    -fx-text-fill: white;
+}
+
+.nav-btn:selected {
+    -fx-background-color: #52b788;
+    -fx-text-fill: #1b4332;
+    -fx-font-weight: bold;
+}
+
+/* ══════════════════════════════
+   TOP BAR
+   ══════════════════════════════ */
+.topbar {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 10 20;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 6, 0, 0, 2);
+}
+
+.topbar-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-fill: #2d6a4f;
+}
+
+.topbar-user {
+    -fx-text-fill: #555;
+    -fx-font-size: 13px;
+}
+
+/* ══════════════════════════════
+   INPUTS
+   ══════════════════════════════ */
+.nufi-input {
+    -fx-background-color: #f5f5f5;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 10 14;
+    -fx-font-size: 13px;
+    -fx-pref-height: 40px;
+}
+
+.nufi-input:focused {
+    -fx-border-color: #2d6a4f;
+    -fx-background-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(45,106,79,0.2), 6, 0, 0, 0);
+}
+
+/* ══════════════════════════════
+   BOTONES
+   ══════════════════════════════ */
+.btn-primary {
+    -fx-background-color: #2d6a4f;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 12 28;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-pref-height: 44px;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #1b4332;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 8, 0, 0, 2);
+}
+
+.btn-secondary {
+    -fx-background-color: transparent;
+    -fx-border-color: #2d6a4f;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-text-fill: #2d6a4f;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+}
+
+.btn-danger {
+    -fx-background-color: #c1121f;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+}
+
+.btn-danger-sm {
+    -fx-background-color: transparent;
+    -fx-border-color: #c1121f;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-text-fill: #c1121f;
+    -fx-padding: 6 14;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+/* ══════════════════════════════
+   TABLAS
+   ══════════════════════════════ */
+.table-view {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.table-view .column-header {
+    -fx-background-color: #f0f7f4;
+    -fx-border-color: #e0e0e0;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #f0f7f4;
+}
+
+.table-view .column-header .label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d6a4f;
+    -fx-font-size: 12px;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #fafafa;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #d8f3dc;
+    -fx-text-fill: #1b4332;
+}
+
+/* ══════════════════════════════
+   CARDS / PANELES
+   ══════════════════════════════ */
+.card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 3);
+    -fx-padding: 20;
+}
+
+.card-titulo {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d6a4f;
+}
+
+/* Tarjetas de stats del dashboard */
+.stat-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 3);
+    -fx-padding: 24;
+    -fx-min-width: 180;
+    -fx-cursor: hand;
+}
+
+.stat-numero {
+    -fx-font-size: 34px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d6a4f;
+}
+
+.stat-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #888;
+}
+
+/* ══════════════════════════════
+   LABELS
+   ══════════════════════════════ */
+.label-error {
+    -fx-text-fill: #c1121f;
+    -fx-font-size: 12px;
+}
+
+.label-muted {
+    -fx-text-fill: #aaa;
+    -fx-font-size: 11px;
+}
+
+.label-titulo {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1b4332;
+}
+
+/* Badges de alerta */
+.badge-alerta {
+    -fx-background-color: #c1121f;
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-padding: 2 8;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.badge-ok {
+    -fx-background-color: #52b788;
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-padding: 2 8;
+    -fx-font-size: 11px;
+}
+
+/* ══════════════════════════════
+   CONTENT AREA
+   ══════════════════════════════ */
+.content-area {
+    -fx-background-color: #f8f4ef;
+    -fx-padding: 24;
+}
+
+/* ══════════════════════════════
+   CHAT IA
+   ══════════════════════════════ */
+.chat-burbuja-user {
+    -fx-background-color: #2d6a4f;
+    -fx-background-radius: 16 16 4 16;
+    -fx-padding: 10 14;
+    -fx-text-fill: white;
+    -fx-max-width: 380;
+}
+
+.chat-burbuja-ia {
+    -fx-background-color: white;
+    -fx-background-radius: 16 16 16 4;
+    -fx-padding: 10 14;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 6, 0, 0, 2);
+    -fx-max-width: 380;
+}

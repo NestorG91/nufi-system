@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.nufi.ui.controllers.LoginController"
+           styleClass="login-bg">
+
+    <VBox styleClass="login-card" maxWidth="420"
+          alignment="CENTER" spacing="14">
+
+        <!-- Logo y título -->
+        <Label text="☕ NUFI" styleClass="login-title"/>
+        <Label text="Finca La Quinta · Vereda Albania, Santander"
+               styleClass="login-subtitle"/>
+
+        <Separator/>
+
+        <!-- Campos -->
+        <Label text="Usuario:"/>
+        <TextField fx:id="txtUsuario"
+                   promptText="Ingresa tu usuario"
+                   styleClass="nufi-input"/>
+
+        <Label text="Contraseña:"/>
+        <PasswordField fx:id="txtPassword"
+                       promptText="Ingresa tu contraseña"
+                       styleClass="nufi-input"/>
+
+        <!-- Error -->
+        <Label fx:id="lblError"
+               styleClass="label-error"
+               visible="false"
+               wrapText="true"/>
+
+        <!-- Botón -->
+        <Button fx:id="btnLogin"
+                text="Ingresar"
+                styleClass="btn-primary"
+                maxWidth="Infinity"
+                onAction="#handleLogin"/>
+
+        <Label text="NUFI v1.0 · Filimón y Nubia"
+               styleClass="label-muted"
+               alignment="CENTER"/>
+
+        <VBox.margin>
+            <Insets top="40" right="50" bottom="40" left="50"/>
+        </VBox.margin>
+    </VBox>
+
+</StackPane>

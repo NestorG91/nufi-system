@@ -47,7 +47,7 @@ public class Cosecha {
         System.out.println("Pergamino real:      " + pergaminoRealKg + " kg");
         System.out.println("Precio kilo:         $" + String.format("%,.0f", precioKiloVenta));
         System.out.println("Total venta:         $" + String.format("%,.0f", totalVenta));
-        System.out.println("Gastos trabajadores: $" + String.format("%,.0f", gastosTrabajadores));
+        System.out.println("Gastos trabajadores.fxml: $" + String.format("%,.0f", gastosTrabajadores));
         System.out.println("Ganancia neta:       $" + String.format("%,.0f", gananciaNeta));
         System.out.println("================================");
     }

@@ -11,26 +11,52 @@ public class Usuario {
     String rol;
     int activo;
 
-    //Constructor
+    // Constructor
     public Usuario(String nombre, String usuario, String contrasena, String rol) {
         this.nombre = nombre;
         this.usuario = usuario;
-        this.contrasena = encriptarContrasena(contrasena);;
+        this.contrasena = encriptarContrasena(contrasena);
         this.rol = rol;
         this.activo = 1;
     }
-    // Encriptar contraseña con BCrypt
-    public static String encriptarContrasena(String contrasena){
+
+    // Encriptar contraseña
+    public static String encriptarContrasena(String contrasena) {
         return BCrypt.hashpw(contrasena, BCrypt.gensalt());
     }
-    //Verificar la contraseña al hacer Login
-    public static boolean verificarContrasena(String contrasenaIngresada, String hashGuardado){
+
+    // Verificar contraseña
+    public static boolean verificarContrasena(String contrasenaIngresada, String hashGuardado) {
         return BCrypt.checkpw(contrasenaIngresada, hashGuardado);
     }
-    //Mostrar informacion del usuario
-    public void mostrarInf(){
-        System.out.println("  Usuario: " + usuario +
-                " | Nombre: " + nombre +
-                " | Rol: "    + rol);
+
+    // Mostrar info
+    public void mostrarInf() {
+        System.out.println(
+                "Usuario: " + usuario +
+                        " | Nombre: " + nombre +
+                        " | Rol: " + rol
+        );
+    }
+
+    // GETTERS
+    public int getId() {
+        return id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public String getUsuario() {
+        return usuario;
+    }
+
+    public String getRol() {
+        return rol;
+    }
+
+    public int getActivo() {
+        return activo;
     }
 }

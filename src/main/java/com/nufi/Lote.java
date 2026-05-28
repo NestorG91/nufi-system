@@ -2,19 +2,44 @@ package com.nufi;
 
 public class Lote {
 
-    String nombre;
-    int matas;
-    String fechaSiembra;
+    // =========================================
+    // ATRIBUTOS
+    // =========================================
+    public int    id;
+    public String nombre;
+    public int    matas;
+    public String fechaSiembra;
+    public double kilosCosechados;
 
-    //Contructor
-
+    // =========================================
+    // CONSTRUCTOR
+    // =========================================
     public Lote(String nombre, int matas, String fechaSiembra) {
-        this.nombre = nombre;
-        this.matas = matas;
+        this.nombre       = nombre;
+        this.matas        = matas;
         this.fechaSiembra = fechaSiembra;
     }
 
-    public void mostrarInfo(){
-        System.out.println(" Lote: " + nombre + " | Matas: " + matas + " | Sembrado: " + fechaSiembra);
+    // =========================================
+    // GETTERS — necesarios para JavaFX TableView
+    // =========================================
+    public int    getId(){
+        return id; }
+    public String getNombre(){
+        return nombre; }
+    public int    getMatas(){
+        return matas; }
+    public String getFechaSiembra(){
+        return fechaSiembra; }
+    public double getKilosCosechados(){
+        return kilosCosechados; }
+
+    // =========================================
+    // MOSTRAR INFO EN CONSOLA
+    // =========================================
+    public void mostrarInfo() {
+        System.out.println("  Lote: " + nombre +
+                " | Matas: "   + matas +
+                " | Sembrado: " + fechaSiembra);
     }
 }

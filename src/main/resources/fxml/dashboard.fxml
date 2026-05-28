@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.nufi.ui.controllers.DashboardController"
+            prefWidth="1100" prefHeight="700">
+
+    <!-- ══ SIDEBAR ══ -->
+    <left>
+        <VBox styleClass="sidebar" spacing="4">
+            <padding><Insets top="16" right="8" bottom="16" left="8"/></padding>
+
+            <Label text="MENÚ PRINCIPAL" styleClass="sidebar-section-label"/>
+
+            <ToggleButton fx:id="btnDashboard"  text="🏠  Dashboard"
+                          maxWidth="Infinity" styleClass="nav-btn"
+                          onAction="#mostrarDashboard"/>
+            <ToggleButton fx:id="btnLotes"      text="🌿  Lotes"
+                          maxWidth="Infinity" styleClass="nav-btn"
+                          onAction="#mostrarLotes"/>
+            <ToggleButton fx:id="btnTrabajadores" text="👷  Trabajadores"
+                          maxWidth="Infinity" styleClass="nav-btn"
+                          onAction="#mostrarTrabajadores"/>
+            <ToggleButton fx:id="btnJornadas"   text="📅  Jornadas"
+                          maxWidth="Infinity" styleClass="nav-btn"
+                          onAction="#mostrarJornadas"/>
+            <ToggleButton fx:id="btnInventario" text="📦  Inventario"
+                          maxWidth="Infinity" styleClass="nav-btn"
+                          onAction="#mostrarInventario"/>
+            <ToggleButton fx:id="btnCosecha"    text="☕  Cosecha"
+                          maxWidth="Infinity" styleClass="nav-btn"
+                          onAction="#mostrarCosecha"/>
+            <ToggleButton fx:id="btnTiquetes"   text="🧾  Tiquetes"
+                          maxWidth="Infinity" styleClass="nav-btn"
+                          onAction="#mostrarTiquetes"/>
+            <ToggleButton fx:id="btnReportes"   text="📊  Reportes"
+                          maxWidth="Infinity" styleClass="nav-btn"
+                          onAction="#mostrarReportes"/>
+            <ToggleButton fx:id="btnIA"         text="🤖  Asistente IA"
+                          maxWidth="Infinity" styleClass="nav-btn"
+                          onAction="#mostrarAsistenteIA"/>
+
+            <Region VBox.vgrow="ALWAYS"/>
+            <Separator/>
+            <Label text="Finca La Quinta · Vereda Cordoncillar, Albania"
+                   styleClass="sidebar-footer"/>
+        </VBox>
+    </left>
+
+    <!-- ══ TOP BAR ══ -->
+    <top>
+        <HBox styleClass="topbar" alignment="CENTER_LEFT" spacing="12">
+            <padding><Insets top="10" right="20" bottom="10" left="20"/></padding>
+
+            <Label text="☕ NUFI — Finca La Quinta" styleClass="topbar-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblUsuario" styleClass="topbar-user"/>
+            <Button text="Cerrar sesión" styleClass="btn-danger-sm"
+                    onAction="#cerrarSesion"/>
+        </HBox>
+    </top>
+
+    <!-- ══ CONTENIDO CENTRAL ══ -->
+    <center>
+        <StackPane fx:id="contenido" styleClass="content-area">
+            <!-- Aquí se cargan los módulos dinámicamente -->
+
+            <!-- Panel home por defecto -->
+            <VBox alignment="CENTER" spacing="24">
+
+                <Label fx:id="lblBienvenida"
+                       text="¡Bienvenido a NUFI!"
+                       styleClass="login-title"/>
+                <Label text="Selecciona un módulo del menú para comenzar"
+                       styleClass="label-muted"/>
+
+                <!-- Tarjetas de resumen -->
+                <HBox spacing="20" alignment="CENTER">
+
+                    <VBox styleClass="stat-card" alignment="CENTER" spacing="8" onMouseClicked="#mostrarLotes">
+                        <Label text="🌿" style="-fx-font-size:32px;"/>
+                        <Label fx:id="statLotes" text="6" styleClass="stat-numero"/>
+                        <Label text="Lotes activos" styleClass="stat-label"/>
+                    </VBox>
+
+                    <VBox styleClass="stat-card" alignment="CENTER" spacing="8" onMouseClicked="#mostrarTrabajadores">
+                        <Label text="👷" style="-fx-font-size:32px;"/>
+                        <Label fx:id="statTrabajadores" text="0" styleClass="stat-numero"/>
+                        <Label text="Trabajadores" styleClass="stat-label"/>
+                    </VBox>
+
+                    <VBox styleClass="stat-card" alignment="CENTER" spacing="8" onMouseClicked="#mostrarCosecha">
+                        <Label text="☕" style="-fx-font-size:32px;"/>
+                        <Label fx:id="statKilos" text="0" styleClass="stat-numero"/>
+                        <Label text="Kg cosechados" styleClass="stat-label"/>
+                    </VBox>
+
+                    <VBox styleClass="stat-card" alignment="CENTER" spacing="8" onMouseClicked="#mostrarInventario">
+                        <Label text="⚠️" style="-fx-font-size:32px;"/>
+                        <Label fx:id="statAlertas" text="0" styleClass="stat-numero"/>
+                        <Label text="Alertas bodega" styleClass="stat-label"/>
+                    </VBox>
+
+                </HBox>
+            </VBox>
+        </StackPane>
+    </center>
+
+</BorderPane>

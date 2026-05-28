@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.nufi.ui.controllers.LotesController"
+      spacing="16">
+
+    <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
+
+    <!-- ══ ENCABEZADO ══ -->
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <Label text="🌿 Gestión de Lotes"
+               styleClass="label-titulo"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="+ Nuevo Lote"
+                styleClass="btn-primary"
+                onAction="#abrirFormularioNuevo"/>
+    </HBox>
+
+    <!-- ══ TABLA ══ -->
+    <TableView fx:id="tablaLotes"
+               VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colId"
+                         text="ID" prefWidth="60"/>
+            <TableColumn fx:id="colNombre"
+                         text="Lote" prefWidth="150"/>
+            <TableColumn fx:id="colMatas"
+                         text="Matas" prefWidth="100"/>
+            <TableColumn fx:id="colFecha"
+                         text="Fecha Siembra" prefWidth="160"/>
+            <TableColumn fx:id="colKilos"
+                         text="Kg Cosechados" prefWidth="140"/>
+            <TableColumn fx:id="colAcciones"
+                         text="Acciones" prefWidth="150"/>
+        </columns>
+    </TableView>
+
+    <!-- ══ FORMULARIO ══ -->
+    <VBox fx:id="panelFormulario"
+          styleClass="card"
+          spacing="12"
+          visible="false"
+          managed="false">
+
+        <Label text="Datos del Lote"
+               styleClass="card-titulo"/>
+
+        <HBox spacing="12">
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Nombre del lote:"/>
+                <TextField fx:id="txtNombre"
+                           promptText="Ej: Yary"
+                           styleClass="nufi-input"/>
+            </VBox>
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Número de matas:"/>
+                <TextField fx:id="txtMatas"
+                           promptText="Ej: 12000"
+                           styleClass="nufi-input"/>
+            </VBox>
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Fecha de siembra:"/>
+                <TextField fx:id="txtFecha"
+                           promptText="Ej: Mayo-Junio 2020"
+                           styleClass="nufi-input"/>
+            </VBox>
+        </HBox>
+
+        <Label fx:id="lblErrorLote"
+               styleClass="label-error"
+               visible="false"
+               managed="false"/>
+
+        <HBox spacing="8">
+            <Button text="💾 Guardar"
+                    styleClass="btn-primary"
+                    onAction="#guardarLote"/>
+            <Button text="Cancelar"
+                    styleClass="btn-secondary"
+                    onAction="#cancelar"/>
+        </HBox>
+    </VBox>
+
+</VBox>

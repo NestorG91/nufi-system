@@ -56,7 +56,7 @@ public class AsistenteIA {
                             "caficultura colombiana. " +
 
                             "Trabajas para la finca La Quinta ubicada en " +
-                            "Vereda Albania, Santander, Colombia. " +
+                            "Vereda Cordoncillar, Albania, Santander, Colombia. " +
 
                             "La finca pertenece a Filimon y Nubia. " +
 
@@ -65,7 +65,7 @@ public class AsistenteIA {
                             "Ayudas con:\n" +
                             "- cosechas\n" +
                             "- fertilización\n" +
-                            "- manejo de trabajadores\n" +
+                            "- manejo de trabajadores.fxml\n" +
                             "- control agrícola\n" +
                             "- producción de café\n" +
                             "- inventario agrícola\n" +
