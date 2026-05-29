@@ -145,8 +145,14 @@ public class LotesController {
             return;
         }
 
-        Lote lote = new Lote(nombre, matas, fecha);
-        db.guardarLote(lote);
+        if (loteEditando != null) {
+            // ✅ Actualizar lote existente
+            db.actualizarLote(loteEditando.id, nombre, matas, fecha);
+        } else {
+            // ✅ Crear lote nuevo
+            db.guardarLote(new Lote(nombre, matas, fecha));
+        }
+
         cancelar();
         cargarLotes();
     }

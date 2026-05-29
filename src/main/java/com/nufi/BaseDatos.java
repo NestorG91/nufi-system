@@ -507,6 +507,42 @@ public class BaseDatos {
         }
     }
 
+    public java.util.List<Jornada> obtenerJornadas() {
+        java.util.List<Jornada> lista = new java.util.ArrayList<>();
+        try {
+            Statement st = conexion.createStatement();
+            ResultSet rs = st.executeQuery(
+                    "SELECT j.id, t.nombre as trab, l.nombre as lote, " +
+                            "j.fecha, j.tipo_trabajo, j.modo_pago, " +
+                            "j.kilos, j.valor_dia, j.valor_kilo, " +
+                            "j.total_pagar, j.observaciones " +
+                            "FROM jornadas j " +
+                            "JOIN trabajadores t ON j.trabajador_id = t.id " +
+                            "JOIN lotes l ON j.lote_id = l.id " +
+                            "ORDER BY j.fecha DESC"
+            );
+            while (rs.next()) {
+                Jornada j = new Jornada(
+                        0, 0,
+                        rs.getString("fecha"),
+                        rs.getString("tipo_trabajo"),
+                        rs.getString("modo_pago"),
+                        rs.getDouble("kilos"),
+                        rs.getDouble("valor_dia"),
+                        rs.getDouble("valor_kilo"),
+                        rs.getString("observaciones")
+                );
+                j.id                = rs.getInt("id");
+                j.nombreTrabajador  = rs.getString("trab");
+                j.nombreLote        = rs.getString("lote");
+                lista.add(j);
+            }
+        } catch (Exception e) {
+            System.out.println("❌ Error: " + e.getMessage());
+        }
+        return lista;
+    }
+
     // Verificar si un lote ya existe
     public boolean loteExiste(String nombre) {
         try {
@@ -518,6 +554,24 @@ public class BaseDatos {
         } catch (Exception e) {
             System.out.println("❌ Error al verificar: " + e.getMessage());
             return false;
+        }
+    }
+    // Actualizar lote existente
+    public void actualizarLote(int id, String nombre,
+                               int matas, String fechaSiembra) {
+        try {
+            PreparedStatement ps = conexion.prepareStatement(
+                    "UPDATE lotes SET nombre=?, matas=?, " +
+                            "fechaSiembra=? WHERE id=?"
+            );
+            ps.setString(1, nombre);
+            ps.setInt(2, matas);
+            ps.setString(3, fechaSiembra);
+            ps.setInt(4, id);
+            ps.executeUpdate();
+            System.out.println("✅ Lote actualizado");
+        } catch (Exception e) {
+            System.out.println("❌ Error: " + e.getMessage());
         }
     }
 

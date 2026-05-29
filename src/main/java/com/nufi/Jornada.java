@@ -2,6 +2,10 @@ package com.nufi;
 
 public class Jornada {
 
+    public int    id;
+    public String nombreTrabajador;
+    public String nombreLote;
+
     int trabajadorId;
     int loteId;
     String fecha;
@@ -35,6 +39,22 @@ public class Jornada {
             this.totalPagar = valorDia;
         }
     }
+    public int    getId(){
+        return id; }
+    public String getNombreTrabajador() {
+        return nombreTrabajador; }
+    public String getNombreLote()       {
+        return nombreLote; }
+    public String getFecha()            {
+        return fecha; }
+    public String getTipoTrabajo()      {
+        return tipoTrabajo; }
+    public String getModoPago()         {
+        return modoPago; }
+    public double getKilos()            {
+        return kilos; }
+    public double getTotalPagar()       {
+        return totalPagar; }
 
     // Mostrar info de la jornada
     public void mostrarInfo() {

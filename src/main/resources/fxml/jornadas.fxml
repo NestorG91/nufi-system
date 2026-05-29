@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.nufi.ui.controllers.JornadasController"
+      spacing="16">
+
+    <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
+
+    <!-- ══ ENCABEZADO ══ -->
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <Label text="📅 Gestión de Jornadas"
+               styleClass="label-titulo"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="+ Nueva Jornada"
+                styleClass="btn-primary"
+                onAction="#abrirFormularioNuevo"/>
+    </HBox>
+
+    <!-- ══ TABLA ══ -->
+    <TableView fx:id="tablaJornadas"
+               VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colId"
+                         text="ID" prefWidth="50"/>
+            <TableColumn fx:id="colTrabajador"
+                         text="Trabajador" prefWidth="160"/>
+            <TableColumn fx:id="colLote"
+                         text="Lote" prefWidth="120"/>
+            <TableColumn fx:id="colFecha"
+                         text="Fecha" prefWidth="110"/>
+            <TableColumn fx:id="colTipo"
+                         text="Labor" prefWidth="120"/>
+            <TableColumn fx:id="colPago"
+                         text="Modo Pago" prefWidth="100"/>
+            <TableColumn fx:id="colKilos"
+                         text="Kilos" prefWidth="80"/>
+            <TableColumn fx:id="colTotal"
+                         text="Total $" prefWidth="100"/>
+            <TableColumn fx:id="colAcciones"
+                         text="Acciones" prefWidth="120"/>
+        </columns>
+    </TableView>
+
+    <!-- ══ FORMULARIO ══ -->
+    <VBox fx:id="panelFormulario"
+          styleClass="card"
+          spacing="12"
+          visible="false"
+          managed="false">
+
+        <Label text="Datos de la Jornada"
+               styleClass="card-titulo"/>
+
+        <HBox spacing="12">
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Trabajador:"/>
+                <ComboBox fx:id="cmbTrabajador"
+                          promptText="Seleccionar..."
+                          maxWidth="Infinity"
+                          styleClass="nufi-input"/>
+            </VBox>
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Lote:"/>
+                <ComboBox fx:id="cmbLote"
+                          promptText="Seleccionar..."
+                          maxWidth="Infinity"
+                          styleClass="nufi-input"/>
+            </VBox>
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Fecha:"/>
+                <DatePicker fx:id="dpFecha"
+                            maxWidth="Infinity"
+                            styleClass="nufi-input"/>
+            </VBox>
+        </HBox>
+
+        <HBox spacing="12">
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Tipo de trabajo:"/>
+                <ComboBox fx:id="cmbTipoTrabajo"
+                          maxWidth="Infinity"
+                          styleClass="nufi-input"/>
+            </VBox>
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Modo de pago:"/>
+                <ComboBox fx:id="cmbModoPago"
+                          maxWidth="Infinity"
+                          styleClass="nufi-input"/>
+            </VBox>
+        </HBox>
+
+        <!-- Campos dinámicos según modo pago -->
+        <HBox fx:id="panelKilos" spacing="12"
+              visible="false" managed="false">
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Kilos recogidos:"/>
+                <TextField fx:id="txtKilos"
+                           promptText="Ej: 85"
+                           styleClass="nufi-input"/>
+            </VBox>
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Valor por kilo $:"/>
+                <TextField fx:id="txtValorKilo"
+                           promptText="Ej: 1200"
+                           styleClass="nufi-input"/>
+            </VBox>
+        </HBox>
+
+        <HBox fx:id="panelDia" spacing="12"
+              visible="false" managed="false">
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Valor del día $:"/>
+                <TextField fx:id="txtValorDia"
+                           promptText="Ej: 45000"
+                           styleClass="nufi-input"/>
+            </VBox>
+        </HBox>
+
+        <!-- Total calculado -->
+        <HBox spacing="8" alignment="CENTER_LEFT">
+            <Label text="Total a pagar:"/>
+            <Label fx:id="lblTotal"
+                   text="0"
+                   style="-fx-font-weight:bold; -fx-font-size:16px; -fx-text-fill:#2d6a4f;"/>
+        </HBox>
+
+        <VBox spacing="4">
+            <Label text="Observaciones:"/>
+            <TextField fx:id="txtObservaciones"
+                       promptText="Opcional..."
+                       styleClass="nufi-input"/>
+        </VBox>
+
+        <Label fx:id="lblError"
+               styleClass="label-error"
+               visible="false"
+               managed="false"/>
+
+        <HBox spacing="8">
+            <Button text="💾 Guardar"
+                    styleClass="btn-primary"
+                    onAction="#guardarJornada"/>
+            <Button text="Cancelar"
+                    styleClass="btn-secondary"
+                    onAction="#cancelar"/>
+        </HBox>
+    </VBox>
+</VBox>

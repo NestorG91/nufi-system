@@ -137,7 +137,7 @@ public class DashboardController {
     }
 
     @FXML private void mostrarJornadas() {
-        mostrarProximamente("📅 Jornadas");
+        cargarVista("/fxml/jornadas.fxml");
     }
 
     @FXML private void mostrarInventario() {
