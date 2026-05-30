@@ -141,7 +141,7 @@ public class DashboardController {
     }
 
     @FXML private void mostrarInventario() {
-        mostrarProximamente("📦 Inventario");
+        cargarVista("/fxml/inventario.fxml");
     }
 
     @FXML private void mostrarCosecha() {

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.nufi.ui.controllers.InventarioController"
+      spacing="16">
+
+    <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
+
+    <!-- ══ ENCABEZADO ══ -->
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <Label text="📦 Gestión de Inventario"
+               styleClass="label-titulo"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="+ Nuevo Producto"
+                styleClass="btn-primary"
+                onAction="#abrirFormularioNuevo"/>
+    </HBox>
+
+    <!-- ══ TABLA ══ -->
+    <TableView fx:id="tablaInventario"
+               VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colId"
+                         text="ID" prefWidth="50"/>
+            <TableColumn fx:id="colNombre"
+                         text="Producto" prefWidth="180"/>
+            <TableColumn fx:id="colTipo"
+                         text="Tipo" prefWidth="100"/>
+            <TableColumn fx:id="colUnidad"
+                         text="Unidad" prefWidth="90"/>
+            <TableColumn fx:id="colStock"
+                         text="Stock" prefWidth="90"/>
+            <TableColumn fx:id="colMinimo"
+                         text="Mínimo" prefWidth="90"/>
+            <TableColumn fx:id="colPrecio"
+                         text="Precio $" prefWidth="110"/>
+            <TableColumn fx:id="colEstado"
+                         text="Estado" prefWidth="100"/>
+            <TableColumn fx:id="colAcciones"
+                         text="Acciones" prefWidth="160"/>
+        </columns>
+    </TableView>
+
+    <!-- ══ FORMULARIO ══ -->
+    <VBox fx:id="panelFormulario"
+          styleClass="card"
+          spacing="12"
+          visible="false"
+          managed="false">
+
+        <Label text="Datos del Producto"
+               styleClass="card-titulo"/>
+
+        <HBox spacing="12">
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Nombre del producto:"/>
+                <TextField fx:id="txtNombre"
+                           promptText="Ej: Abono Triple 15"
+                           styleClass="nufi-input"/>
+            </VBox>
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Tipo:"/>
+                <ComboBox fx:id="cmbTipo"
+                          maxWidth="Infinity"
+                          styleClass="nufi-input"/>
+            </VBox>
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Unidad de medida:"/>
+                <ComboBox fx:id="cmbUnidad"
+                          maxWidth="Infinity"
+                          styleClass="nufi-input"/>
+            </VBox>
+        </HBox>
+
+        <HBox spacing="12">
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Stock actual:"/>
+                <TextField fx:id="txtStock"
+                           promptText="Ej: 10"
+                           styleClass="nufi-input"/>
+            </VBox>
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Stock mínimo:"/>
+                <TextField fx:id="txtMinimo"
+                           promptText="Ej: 3"
+                           styleClass="nufi-input"/>
+            </VBox>
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Precio por unidad $:"/>
+                <TextField fx:id="txtPrecio"
+                           promptText="Ej: 85000"
+                           styleClass="nufi-input"/>
+            </VBox>
+        </HBox>
+
+        <Label fx:id="lblError"
+               styleClass="label-error"
+               visible="false"
+               managed="false"/>
+
+        <HBox spacing="8">
+            <Button text="💾 Guardar"
+                    styleClass="btn-primary"
+                    onAction="#guardarProducto"/>
+            <Button text="Cancelar"
+                    styleClass="btn-secondary"
+                    onAction="#cancelar"/>
+        </HBox>
+    </VBox>
+</VBox>

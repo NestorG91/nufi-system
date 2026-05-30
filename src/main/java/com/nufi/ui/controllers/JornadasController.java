@@ -58,23 +58,26 @@ public class JornadasController {
     }
 
     private void configurarColumnas() {
-        colId.setCellValueFactory(
-                new PropertyValueFactory<>("id"));
-        colTrabajador.setCellValueFactory(
-                new PropertyValueFactory<>("nombreTrabajador"));
-        colLote.setCellValueFactory(
-                new PropertyValueFactory<>("nombreLote"));
-        colFecha.setCellValueFactory(
-                new PropertyValueFactory<>("fecha"));
-        colTipo.setCellValueFactory(
-                new PropertyValueFactory<>("tipoTrabajo"));
-        colPago.setCellValueFactory(
-                new PropertyValueFactory<>("modoPago"));
-        colKilos.setCellValueFactory(
-                new PropertyValueFactory<>("kilos"));
-        colTotal.setCellValueFactory(
-                new PropertyValueFactory<>("totalPagar"));
+        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colTrabajador.setCellValueFactory(new PropertyValueFactory<>("nombreTrabajador"));
+        colLote.setCellValueFactory(new PropertyValueFactory<>("nombreLote"));
+        colFecha.setCellValueFactory(new PropertyValueFactory<>("fecha"));
+        colTipo.setCellValueFactory(new PropertyValueFactory<>("tipoTrabajo"));
+        colPago.setCellValueFactory(new PropertyValueFactory<>("modoPago"));
+        colKilos.setCellValueFactory(new PropertyValueFactory<>("kilos"));
+        colTotal.setCellValueFactory(new PropertyValueFactory<>("totalPagar"));
 
+        // ✅ Centrar texto en todas las columnas
+        centrarColumna(colId);
+        centrarColumna(colTrabajador);
+        centrarColumna(colLote);
+        centrarColumna(colFecha);
+        centrarColumna(colTipo);
+        centrarColumna(colPago);
+        centrarColumna(colKilos);
+        centrarColumna(colTotal);
+
+        // Columna acciones — ya está bien
         colAcciones.setCellFactory(col -> new TableCell<>() {
             private final Button btnVer = new Button("👁 Ver");
             private final HBox box = new HBox(btnVer);
@@ -94,7 +97,7 @@ public class JornadasController {
             }
         });
 
-        // Listener modo pago
+        // Listeners modo pago
         cmbModoPago.valueProperty().addListener((obs, old, nuevo) -> {
             if ("kilo".equals(nuevo)) {
                 panelKilos.setVisible(true);
@@ -110,13 +113,26 @@ public class JornadasController {
             calcularTotal();
         });
 
-        // Listeners para calcular total
-        txtKilos.textProperty().addListener(
-                (obs, old, n) -> calcularTotal());
-        txtValorKilo.textProperty().addListener(
-                (obs, old, n) -> calcularTotal());
-        txtValorDia.textProperty().addListener(
-                (obs, old, n) -> calcularTotal());
+        txtKilos.textProperty().addListener((obs, old, n) -> calcularTotal());
+        txtValorKilo.textProperty().addListener((obs, old, n) -> calcularTotal());
+        txtValorDia.textProperty().addListener((obs, old, n) -> calcularTotal());
+    }
+
+    // ✅ Método helper igual que en Lotes y Trabajadores
+    private <T> void centrarColumna(TableColumn<Jornada, T> col) {
+        col.setCellFactory(column -> new TableCell<>() {
+            @Override
+            protected void updateItem(T item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.toString());
+                    setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                    setStyle("-fx-padding: 0 0 0 12;");
+                }
+            }
+        });
     }
 
     private void cargarCombos() {

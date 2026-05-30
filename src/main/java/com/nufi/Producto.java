@@ -2,39 +2,29 @@ package com.nufi;
 
 public class Producto {
 
-    int id;
-    String nombre;
-    String tipo; // abono, veneno, herramienta
-    String unidadMedida; // kilos, bultos, litros
-    double stockActual;
-    double stockMinimo;
-    double precioUnidad;
-    int activo;
+    public int    id;
+    public String nombre;
+    public String tipo;
+    public String unidadMedida;
+    public double stockActual;
+    public double stockMinimo;
+    public double precioUnidad;
 
-//Se crea el contructor
-    public  Producto(String nombre, String tipo, String unidadMedida, double stockActual, double stockMinimo,
-                     double precioUnidad) {
-        this.nombre = nombre;
-        this.tipo = tipo;
+    public Producto(String nombre, String tipo, String unidadMedida,
+                    double stockActual, double stockMinimo, double precioUnidad) {
+        this.nombre       = nombre;
+        this.tipo         = tipo;
         this.unidadMedida = unidadMedida;
-        this.stockActual = stockActual;
-        this.stockMinimo = stockMinimo;
+        this.stockActual  = stockActual;
+        this.stockMinimo  = stockMinimo;
         this.precioUnidad = precioUnidad;
-        this.activo = 1; // siempre activo al crearse
     }
-// Verificar si el stock está bajo
-    public boolean stockBajo(){
-        return stockActual <= stockMinimo;
-    }
-// Mostrar info del producto
-    public void mostrarInfo(){
-    String alerta = stockBajo() ? " ⚠️ STOCK BAJO" : "";
-        System.out.println(" " + nombre +
-                " | Tipo: " + tipo +
-                " | Unidad: " + unidadMedida +
-                " | Stock: " + stockActual +
-                " | Mínimo: " + stockMinimo +
-                " | Precio: " + precioUnidad +
-                alerta);
-    }
+
+    public int    getId()           { return id; }
+    public String getNombre()       { return nombre; }
+    public String getTipo()         { return tipo; }
+    public String getUnidadMedida() { return unidadMedida; }
+    public double getStockActual()  { return stockActual; }
+    public double getStockMinimo()  { return stockMinimo; }
+    public double getPrecioUnidad() { return precioUnidad; }
 }
