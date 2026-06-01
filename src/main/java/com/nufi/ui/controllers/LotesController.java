@@ -57,21 +57,30 @@ public class LotesController {
         centrarColumna(colKilos);
 
         colAcciones.setCellFactory(col -> new TableCell<>() {
-            private final Button btnEditar = new Button("✏️ Editar");
-            private final HBox box = new HBox(btnEditar);
+            private final Button btnEditar    = new Button("✏️ Editar");
+            private final Button btnHistorial = new Button("📋 Historial");
+            private final HBox box = new HBox(4, btnEditar, btnHistorial);
 
             {
                 box.setAlignment(javafx.geometry.Pos.CENTER);
-                btnEditar.setStyle(
-                        "-fx-background-color:#2d6a4f;" +
-                                "-fx-text-fill:white;" +
-                                "-fx-background-radius:6;" +
-                                "-fx-padding:4 10;" +
-                                "-fx-cursor:hand;");
+                String estilo = "-fx-background-radius:6;" +
+                        "-fx-padding:4 8;" +
+                        "-fx-cursor:hand;" +
+                        "-fx-text-fill:white;";
+                btnEditar.setStyle(estilo +
+                        "-fx-background-color:#2d6a4f;");
+                btnHistorial.setStyle(estilo +
+                        "-fx-background-color:#457b9d;");
+
                 btnEditar.setOnAction(e -> {
                     Lote lote = getTableView()
                             .getItems().get(getIndex());
                     abrirFormularioEditar(lote);
+                });
+                btnHistorial.setOnAction(e -> {
+                    Lote lote = getTableView()
+                            .getItems().get(getIndex());
+                    abrirHistorial(lote);
                 });
             }
 
@@ -105,6 +114,30 @@ public class LotesController {
                         db.obtenerLotesConKilos()
                 );
         tablaLotes.setItems(lista);
+    }
+
+    private void abrirHistorial(Lote lote) {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource("/fxml/historial_lote.fxml")
+            );
+            javafx.scene.Parent root = loader.load();
+
+            HistorialLoteController ctrl = loader.getController();
+            ctrl.cargarDatos(lote);
+
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setTitle("📋 Historial — Lote " + lote.nombre);
+            stage.setScene(new javafx.scene.Scene(root));
+            stage.setMinWidth(780);
+            stage.setMinHeight(550);
+            stage.show();
+
+        } catch (Exception e) {
+            System.out.println("❌ Error abriendo historial: "
+                    + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -146,10 +179,8 @@ public class LotesController {
         }
 
         if (loteEditando != null) {
-            // ✅ Actualizar lote existente
             db.actualizarLote(loteEditando.id, nombre, matas, fecha);
         } else {
-            // ✅ Crear lote nuevo
             db.guardarLote(new Lote(nombre, matas, fecha));
         }
 

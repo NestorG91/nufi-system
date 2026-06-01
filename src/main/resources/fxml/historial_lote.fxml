@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.nufi.ui.controllers.HistorialLoteController"
+      spacing="16" prefWidth="750" prefHeight="600">
+
+    <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
+
+    <!-- ENCABEZADO -->
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <Label fx:id="lblTituloLote"
+               text="🌿 Historial del Lote"
+               styleClass="label-titulo"/>
+    </HBox>
+
+    <!-- TABS -->
+    <TabPane VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE">
+
+        <!-- TAB JORNADAS -->
+        <Tab text="👷 Jornadas">
+            <TableView fx:id="tablaJornadas" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colJFecha"
+                                 text="Fecha" prefWidth="110"/>
+                    <TableColumn fx:id="colJTrabajador"
+                                 text="Trabajador" prefWidth="160"/>
+                    <TableColumn fx:id="colJTipo"
+                                 text="Labor" prefWidth="120"/>
+                    <TableColumn fx:id="colJModo"
+                                 text="Pago" prefWidth="80"/>
+                    <TableColumn fx:id="colJKilos"
+                                 text="Kilos" prefWidth="80"/>
+                    <TableColumn fx:id="colJTotal"
+                                 text="Total $" prefWidth="100"/>
+                    <TableColumn fx:id="colJObs"
+                                 text="Observaciones" prefWidth="180"/>
+                </columns>
+            </TableView>
+        </Tab>
+
+        <!-- TAB INSUMOS -->
+        <Tab text="📦 Insumos">
+            <TableView fx:id="tablaInsumos" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colIFecha"
+                                 text="Fecha" prefWidth="110"/>
+                    <TableColumn fx:id="colIProducto"
+                                 text="Producto" prefWidth="180"/>
+                    <TableColumn fx:id="colICantidad"
+                                 text="Cantidad" prefWidth="100"/>
+                    <TableColumn fx:id="colITipo"
+                                 text="Movimiento" prefWidth="110"/>
+                    <TableColumn fx:id="colIObs"
+                                 text="Observaciones" prefWidth="220"/>
+                </columns>
+            </TableView>
+        </Tab>
+
+        <!-- TAB COSECHAS -->
+        <Tab text="☕ Cosechas">
+            <TableView fx:id="tablaCosechas" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colCNombre"
+                                 text="Cosecha" prefWidth="180"/>
+                    <TableColumn fx:id="colCEstado"
+                                 text="Estado" prefWidth="110"/>
+                    <TableColumn fx:id="colCCereza"
+                                 text="Cereza kg" prefWidth="110"/>
+                    <TableColumn fx:id="colCPergamino"
+                                 text="Pergamino est." prefWidth="130"/>
+                    <TableColumn fx:id="colCFecha"
+                                 text="Fecha inicio" prefWidth="120"/>
+                </columns>
+            </TableView>
+        </Tab>
+
+        <!-- TAB RESUMEN -->
+        <Tab text="📊 Resumen">
+            <VBox spacing="16" style="-fx-padding:20;">
+                <Label fx:id="lblResumenJornadas"
+                       text="👷 Total jornadas: 0"
+                       style="-fx-font-size:14px;"/>
+                <Label fx:id="lblResumenKilos"
+                       text="☕ Total kilos recolectados: 0 kg"
+                       style="-fx-font-size:14px;"/>
+                <Label fx:id="lblResumenPagado"
+                       text="💰 Total pagado trabajadores: $0"
+                       style="-fx-font-size:14px;"/>
+                <Label fx:id="lblResumenInsumos"
+                       text="📦 Total insumos usados: 0"
+                       style="-fx-font-size:14px;"/>
+                <Label fx:id="lblResumenCosechas"
+                       text="🌱 Total cosechas: 0"
+                       style="-fx-font-size:14px;"/>
+            </VBox>
+        </Tab>
+
+    </TabPane>
+</VBox>
