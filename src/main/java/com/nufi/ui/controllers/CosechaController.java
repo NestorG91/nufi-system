@@ -145,6 +145,7 @@ public class CosechaController {
     private String estadoEmoji(String estado) {
         return switch (estado) {
             case "en_proceso" -> "🟡 En proceso";
+            case "en_espera"  -> "⏸️ En espera";
             case "terminado"  -> "🟢 Terminada";
             case "pendiente"  -> "🔴 Pendiente";
             default           -> estado;
@@ -340,45 +341,98 @@ public class CosechaController {
     }
 
     private void cerrarCosecha(int cosechaId, String nombre) {
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
-                "¿Cerrar la cosecha '" + nombre + "'?\n" +
-                        "Se marcará como terminada.",
-                ButtonType.YES, ButtonType.NO);
-        confirm.setTitle("Cerrar cosecha");
-        confirm.setHeaderText(null);
 
-        confirm.showAndWait().ifPresent(btn -> {
-            if (btn == ButtonType.YES) {
-                try {
-                    // Cerrar todos los lotes
-                    PreparedStatement ps = db.getConexion().prepareStatement(
-                            "UPDATE cosecha_lotes SET estado='terminado', " +
-                                    "fecha_fin=? WHERE cosecha_id=?"
-                    );
-                    ps.setString(1, LocalDate.now().toString());
-                    ps.setInt(2, cosechaId);
-                    ps.executeUpdate();
+        // Mostrar opciones de estado
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(
+                "⏸️ En espera",
+                "⏸️ En espera",
+                "🟢 Cerrar definitivamente"
+        );
+        dialog.setTitle("Cambiar estado de cosecha");
+        dialog.setHeaderText("Cosecha: " + nombre);
+        dialog.setContentText("¿Qué deseas hacer?");
 
-                    // Cerrar cosecha
-                    PreparedStatement ps2 = db.getConexion().prepareStatement(
-                            "UPDATE cosecha SET estado='terminado', " +
-                                    "fecha_fin=? WHERE id=?"
-                    );
-                    ps2.setString(1, LocalDate.now().toString());
-                    ps2.setInt(2, cosechaId);
-                    ps2.executeUpdate();
+        dialog.showAndWait().ifPresent(opcion -> {
+            if (opcion.equals("⏸️ En espera")) {
+                cambiarEstadoCosecha(cosechaId, "en_espera");
+                new Alert(Alert.AlertType.INFORMATION,
+                        "⏸️ Cosecha pausada — en espera.")
+                        .showAndWait();
 
-                    cargarCosechas();
-                    new Alert(Alert.AlertType.INFORMATION,
-                            "✅ Cosecha cerrada exitosamente.")
-                            .showAndWait();
+            } else if (opcion.equals("🟢 Cerrar definitivamente")) {
 
-                } catch (Exception e) {
-                    System.out.println("❌ Error cerrar cosecha: "
-                            + e.getMessage());
-                }
+                // Pedir precio de venta antes de cerrar
+                TextInputDialog dialogPrecio =
+                        new TextInputDialog("0");
+                dialogPrecio.setTitle("Precio de venta");
+                dialogPrecio.setHeaderText(
+                        "¿Cuál es el precio por kg de pergamino?");
+                dialogPrecio.setContentText("Precio por kg $:");
+
+                dialogPrecio.showAndWait().ifPresent(precioStr -> {
+                    try {
+                        double precio = Double.parseDouble(precioStr.trim());
+                        cambiarEstadoCosecha(cosechaId, "terminado");
+                        guardarPrecioVenta(cosechaId, precio);
+                        new Alert(Alert.AlertType.INFORMATION,
+                                "🟢 Cosecha cerrada exitosamente.")
+                                .showAndWait();
+                    } catch (NumberFormatException e) {
+                        new Alert(Alert.AlertType.ERROR,
+                                "Ingresa un precio válido.")
+                                .showAndWait();
+                    }
+                });
             }
+            cargarCosechas();
         });
+    }
+
+    private void cambiarEstadoCosecha(int cosechaId, String estado) {
+        try {
+            // Actualizar cosecha
+            PreparedStatement ps = db.getConexion().prepareStatement(
+                    "UPDATE cosecha SET estado=?, " +
+                            "fecha_fin=? WHERE id=?"
+            );
+            String fecha = estado.equals("terminado") ?
+                    LocalDate.now().toString() : null;
+            ps.setString(1, estado);
+            ps.setString(2, fecha);
+            ps.setInt(3, cosechaId);
+            ps.executeUpdate();
+
+            // Actualizar lotes de la cosecha
+            PreparedStatement ps2 = db.getConexion().prepareStatement(
+                    "UPDATE cosecha_lotes SET estado=? WHERE cosecha_id=?"
+            );
+            ps2.setString(1, estado);
+            ps2.setInt(2, cosechaId);
+            ps2.executeUpdate();
+
+        } catch (Exception e) {
+            System.out.println("❌ Error cambiar estado: " + e.getMessage());
+        }
+    }
+
+    private void guardarPrecioVenta(int cosechaId, double precio) {
+        try {
+            // Calcular total venta con precio ingresado
+            PreparedStatement ps = db.getConexion().prepareStatement(
+                    "UPDATE cosecha SET precio_kilo_venta=?, " +
+                            "total_venta = (SELECT SUM(estimado_pergamino_kg) " +
+                            "FROM cosecha_lotes WHERE cosecha_id=?) * ? " +
+                            "WHERE id=?"
+            );
+            ps.setDouble(1, precio);
+            ps.setInt(2, cosechaId);
+            ps.setDouble(3, precio);
+            ps.setInt(4, cosechaId);
+            ps.executeUpdate();
+            System.out.println("✅ Precio venta guardado: $" + precio);
+        } catch (Exception e) {
+            System.out.println("❌ Error precio venta: " + e.getMessage());
+        }
     }
 
     @FXML

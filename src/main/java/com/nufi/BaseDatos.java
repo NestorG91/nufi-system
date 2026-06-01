@@ -1247,6 +1247,38 @@ public class BaseDatos {
         }
     }
 
+    // Obtener cosecha activa (en_proceso o en_espera)
+    public int obtenerCosechaActivaId() {
+        try {
+            ResultSet rs = conexion.createStatement().executeQuery(
+                    "SELECT id FROM cosecha " +
+                            "WHERE estado = 'en_proceso' " +
+                            "ORDER BY fecha_inicio DESC LIMIT 1"
+            );
+            if (rs.next()) return rs.getInt("id");
+        } catch (Exception e) {
+            System.out.println("❌ Error cosecha activa: " + e.getMessage());
+        }
+        return -1;
+    }
+
+    // Obtener el id de cosecha_lotes dado cosechaId y loteId
+    public int obtenerCosechaLoteId(int cosechaId, int loteId) {
+        try {
+            PreparedStatement ps = conexion.prepareStatement(
+                    "SELECT id FROM cosecha_lotes " +
+                            "WHERE cosecha_id=? AND lote_id=?"
+            );
+            ps.setInt(1, cosechaId);
+            ps.setInt(2, loteId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt("id");
+        } catch (Exception e) {
+            System.out.println("❌ Error cosecha lote id: " + e.getMessage());
+        }
+        return -1;
+    }
+
     // =========================================
     // CONEXIÓN Y CIERRE
     // =========================================

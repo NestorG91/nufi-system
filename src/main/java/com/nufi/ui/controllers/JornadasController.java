@@ -1,10 +1,6 @@
 package com.nufi.ui.controllers;
 
-import com.nufi.BaseDatos;
-import com.nufi.ConexionDB;
-import com.nufi.Jornada;
-import com.nufi.Lote;
-import com.nufi.Trabajador;
+import com.nufi.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -236,7 +232,6 @@ public class JornadasController {
         String obs      = txtObservaciones.getText().trim();
 
         double kilos = 0, valorDia = 0, valorKilo = 0;
-
         try {
             if ("kilo".equals(modo)) {
                 kilos     = Double.parseDouble(txtKilos.getText());
@@ -249,13 +244,62 @@ public class JornadasController {
             return;
         }
 
+        // Guardar jornada
         Jornada j = new Jornada(
                 trabajadorId, loteId, fecha,
                 tipo, modo, kilos, valorDia, valorKilo, obs
         );
         db.guardarJornada(j);
+
+        // ✅ Si es recolección → actualizar cosecha en proceso
+        if ("recoleccion".equals(tipo) && kilos > 0) {
+            int cosechaId = db.obtenerCosechaActivaId();
+
+            if (cosechaId != -1) {
+                int cosechaLoteId = db.obtenerCosechaLoteId(
+                        cosechaId, loteId);
+
+                if (cosechaLoteId != -1) {
+                    db.actualizarCerezaLote(cosechaLoteId, kilos);
+                    System.out.println("✅ Kilos actualizados en cosecha activa");
+                } else {
+                    // El lote no estaba en la cosecha — lo agregamos
+                    CosechaLote cl = new CosechaLote(
+                            cosechaId, loteId, fecha
+                    );
+                    cl.observaciones = "Agregado automáticamente";
+                    db.guardarCosechaLote(cl);
+                    int nuevoId = db.obtenerCosechaLoteId(cosechaId, loteId);
+                    if (nuevoId != -1) {
+                        db.actualizarCerezaLote(nuevoId, kilos);
+                    }
+                    System.out.println("✅ Lote agregado a cosecha activa");
+                }
+
+                // Notificar al usuario
+                mostrarAlertaCosecha(kilos, loteId);
+            }
+        }
+
         cancelar();
         cargarJornadas();
+    }
+
+    private void mostrarAlertaCosecha(double kilos, int loteId) {
+        String nombreLote = listaLotes.stream()
+                .filter(l -> l.id == loteId)
+                .findFirst()
+                .map(l -> l.nombre)
+                .orElse("Lote");
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Cosecha actualizada");
+        alert.setHeaderText("☕ Kilos registrados en cosecha");
+        alert.setContentText(
+                "✅ Se agregaron " + kilos + " kg de cereza\n" +
+                        "al lote " + nombreLote + " en la cosecha activa."
+        );
+        alert.showAndWait();
     }
 
     @FXML
