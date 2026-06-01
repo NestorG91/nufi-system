@@ -145,7 +145,7 @@ public class DashboardController {
     }
 
     @FXML private void mostrarCosecha() {
-        mostrarProximamente("☕ Cosecha");
+        cargarVista("/fxml/cosecha.fxml");
     }
 
     @FXML private void mostrarTiquetes() {

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.nufi.ui.controllers.CosechaController"
+      spacing="16">
+
+    <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
+
+    <!-- ══ ENCABEZADO ══ -->
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <Label text="☕ Gestión de Cosecha"
+               styleClass="label-titulo"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="+ Nueva Cosecha"
+                styleClass="btn-primary"
+                onAction="#abrirFormularioNuevo"/>
+    </HBox>
+
+    <!-- ══ TABLA COSECHAS ══ -->
+    <TableView fx:id="tablaCosechas" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colId"
+                         text="ID" prefWidth="50"/>
+            <TableColumn fx:id="colNombre"
+                         text="Cosecha" prefWidth="180"/>
+            <TableColumn fx:id="colEstado"
+                         text="Estado" prefWidth="110"/>
+            <TableColumn fx:id="colFechaInicio"
+                         text="Fecha Inicio" prefWidth="120"/>
+            <TableColumn fx:id="colCereza"
+                         text="Cereza kg" prefWidth="100"/>
+            <TableColumn fx:id="colPergamino"
+                         text="Pergamino kg" prefWidth="120"/>
+            <TableColumn fx:id="colAcciones"
+                         text="Acciones" prefWidth="200"/>
+        </columns>
+    </TableView>
+
+    <!-- ══ FORMULARIO NUEVA COSECHA ══ -->
+    <VBox fx:id="panelFormulario"
+          styleClass="card"
+          spacing="12"
+          visible="false"
+          managed="false">
+
+        <Label text="Nueva Cosecha"
+               styleClass="card-titulo"/>
+
+        <HBox spacing="12">
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Nombre de la cosecha:"/>
+                <TextField fx:id="txtNombre"
+                           promptText="Ej: Cosecha Mayor 2026"
+                           styleClass="nufi-input"/>
+            </VBox>
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Fecha de inicio:"/>
+                <DatePicker fx:id="dpFechaInicio"
+                            maxWidth="Infinity"
+                            styleClass="nufi-input"/>
+            </VBox>
+        </HBox>
+
+        <VBox spacing="4">
+            <Label text="Observaciones:"/>
+            <TextField fx:id="txtObservaciones"
+                       promptText="Opcional..."
+                       styleClass="nufi-input"/>
+        </VBox>
+
+        <Label text="Selecciona los lotes a cosechar:"
+               style="-fx-font-weight:bold;"/>
+
+        <VBox fx:id="panelLotes" spacing="6"/>
+
+        <Label fx:id="lblError"
+               styleClass="label-error"
+               visible="false"
+               managed="false"/>
+
+        <HBox spacing="8">
+            <Button text="💾 Iniciar Cosecha"
+                    styleClass="btn-primary"
+                    onAction="#guardarCosecha"/>
+            <Button text="Cancelar"
+                    styleClass="btn-secondary"
+                    onAction="#cancelar"/>
+        </HBox>
+    </VBox>
+</VBox>
