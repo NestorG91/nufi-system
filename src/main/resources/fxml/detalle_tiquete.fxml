@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.nufi.ui.controllers.DetalleTiqueteController"
+      prefWidth="380" prefHeight="580"
+      style="-fx-background-color: white;">
+
+    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+    <!-- ══ ENCABEZADO FINCA ══ -->
+    <VBox alignment="CENTER" spacing="4"
+          style="-fx-border-color:#2d6a4f; -fx-border-width:2; -fx-border-radius:8; -fx-background-color:#f8f9fa; -fx-background-radius:8; -fx-padding:16;">
+        <Label text="☕ FINCA LA QUINTA"
+               style="-fx-font-size:18px; -fx-font-weight:bold; -fx-text-fill:#2d6a4f;"/>
+        <Label text="Vereda Cordoncillar"
+               style="-fx-font-size:12px; -fx-text-fill:#555;"/>
+        <Label text="Albania, Santander, Colombia"
+               style="-fx-font-size:12px; -fx-text-fill:#555;"/>
+    </VBox>
+
+    <Separator style="-fx-padding:8 0;"/>
+
+    <!-- ══ NÚMERO TIQUETE ══ -->
+    <VBox alignment="CENTER" spacing="4"
+          style="-fx-padding:8 0;">
+        <Label fx:id="lblNumeroTiquete"
+               text="TIQUETE DE PAGO N°1"
+               style="-fx-font-size:16px; -fx-font-weight:bold; -fx-text-fill:#1a1a1a;"/>
+        <Label fx:id="lblFechaPago"
+               text="Fecha: —"
+               style="-fx-font-size:12px; -fx-text-fill:#555;"/>
+    </VBox>
+
+    <Separator style="-fx-padding:4 0;"/>
+
+    <!-- ══ DATOS TRABAJADOR ══ -->
+    <VBox spacing="10"
+          style="-fx-padding:12 0;">
+
+        <HBox spacing="8">
+            <Label text="👷 Trabajador:"
+                   style="-fx-font-weight:bold; -fx-min-width:130;"/>
+            <Label fx:id="lblTrabajador"
+                   text="—"
+                   style="-fx-text-fill:#333;"/>
+        </HBox>
+
+        <HBox spacing="8">
+            <Label text="🌿 Lote:"
+                   style="-fx-font-weight:bold; -fx-min-width:130;"/>
+            <Label fx:id="lblLote"
+                   text="—"
+                   style="-fx-text-fill:#333;"/>
+        </HBox>
+
+        <HBox spacing="8">
+            <Label text="⚒️ Labor:"
+                   style="-fx-font-weight:bold; -fx-min-width:130;"/>
+            <Label fx:id="lblLabor"
+                   text="—"
+                   style="-fx-text-fill:#333;"/>
+        </HBox>
+
+        <HBox spacing="8">
+            <Label text="💳 Modo pago:"
+                   style="-fx-font-weight:bold; -fx-min-width:130;"/>
+            <Label fx:id="lblModoPago"
+                   text="—"
+                   style="-fx-text-fill:#333;"/>
+        </HBox>
+
+        <HBox fx:id="panelKilos" spacing="8">
+            <Label text="☕ Kilos cereza:"
+                   style="-fx-font-weight:bold; -fx-min-width:130;"/>
+            <Label fx:id="lblKilos"
+                   text="—"
+                   style="-fx-text-fill:#333;"/>
+        </HBox>
+
+    </VBox>
+
+    <Separator style="-fx-padding:4 0;"/>
+
+    <!-- ══ TOTAL ══ -->
+    <VBox alignment="CENTER" spacing="8"
+          style="-fx-background-color:#2d6a4f; -fx-background-radius:8; -fx-padding:16;">
+        <Label text="TOTAL A PAGAR"
+               style="-fx-font-size:13px; -fx-text-fill:white; -fx-font-weight:bold;"/>
+        <Label fx:id="lblTotal"
+               text="0"
+               style="-fx-font-size:28px; -fx-font-weight:bold; -fx-text-fill:white;"/>
+    </VBox>
+
+    <Separator style="-fx-padding:4 0;"/>
+
+    <!-- ══ ESTADO ══ -->
+    <VBox alignment="CENTER" spacing="4"
+          style="-fx-padding:8 0;">
+        <Label fx:id="lblEstado"
+               text="✅ PAGADO"
+               style="-fx-font-size:15px; -fx-font-weight:bold; -fx-text-fill:#2d6a4f;"/>
+    </VBox>
+
+    <!-- ══ PIE ══ -->
+    <Region VBox.vgrow="ALWAYS"/>
+    <VBox alignment="CENTER" spacing="4"
+          style="-fx-padding:8 0;">
+        <Separator/>
+        <Label text="Sistema NUFI — Finca La Quinta"
+               style="-fx-font-size:10px; -fx-text-fill:#aaa;"/>
+        <Label text="Vereda Cordoncillar, Albania, Santander"
+               style="-fx-font-size:10px; -fx-text-fill:#aaa;"/>
+    </VBox>
+
+    <!-- ══ BOTÓN CERRAR ══ -->
+    <HBox alignment="CENTER" spacing="8"
+          style="-fx-padding:12 0 0 0;">
+        <Button text="✖ Cerrar"
+                styleClass="btn-secondary"
+                onAction="#cerrar"/>
+    </HBox>
+
+</VBox>

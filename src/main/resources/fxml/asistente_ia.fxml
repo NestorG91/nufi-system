@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.nufi.ui.controllers.AsistenteIAController"
+      spacing="12">
+
+    <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
+
+    <!-- ══ ENCABEZADO ══ -->
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <Label text="🤖 Asistente IA — NUFI"
+               styleClass="label-titulo"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="🗑️ Limpiar chat"
+                styleClass="btn-secondary"
+                onAction="#limpiarChat"/>
+    </HBox>
+
+    <Label text="Pregúntame sobre la finca, cosechas, trabajadores o inventario"
+           styleClass="label-muted"/>
+
+    <!-- ══ ÁREA DE CHAT ══ -->
+    <ScrollPane fx:id="scrollChat"
+                VBox.vgrow="ALWAYS"
+                fitToWidth="true"
+                style="-fx-background-color:white; -fx-border-color:#e0e0e0; -fx-border-radius:8; -fx-background-radius:8;">
+        <VBox fx:id="contenedorMensajes"
+              spacing="12">
+            <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+        </VBox>
+    </ScrollPane>
+
+    <!-- ══ INDICADOR ESCRIBIENDO ══ -->
+    <HBox fx:id="panelEscribiendo"
+          alignment="CENTER_LEFT"
+          spacing="8"
+          visible="false"
+          managed="false">
+        <Label text="🤖 NUFI IA está pensando..."
+               style="-fx-text-fill:#2d6a4f; -fx-font-style:italic;"/>
+        <ProgressIndicator prefWidth="20" prefHeight="20"/>
+    </HBox>
+
+    <!-- ══ INPUT ══ -->
+    <HBox spacing="8" alignment="CENTER">
+        <TextField fx:id="txtPregunta"
+                   promptText="Escribe tu pregunta aquí..."
+                   HBox.hgrow="ALWAYS"
+                   styleClass="nufi-input"
+                   onAction="#enviarPregunta"/>
+        <Button text="➤ Enviar"
+                styleClass="btn-primary"
+                onAction="#enviarPregunta"/>
+    </HBox>
+
+    <!-- Sugerencias rápidas -->
+    <HBox spacing="8" alignment="CENTER_LEFT">
+        <Label text="💡 Preguntas rápidas:"/>
+        <Button text="¿Cómo va la cosecha?"
+                styleClass="btn-secondary"
+                onAction="#preguntaRapida1"/>
+        <Button text="¿Stock bajo?"
+                styleClass="btn-secondary"
+                onAction="#preguntaRapida2"/>
+        <Button text="¿Cuánto debo pagar?"
+                styleClass="btn-secondary"
+                onAction="#preguntaRapida3"/>
+    </HBox>
+
+</VBox>

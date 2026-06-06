@@ -149,7 +149,7 @@ public class DashboardController {
     }
 
     @FXML private void mostrarTiquetes() {
-        mostrarProximamente("🧾 Tiquetes");
+        cargarVista("/fxml/tiquetes.fxml");
     }
 
     @FXML private void mostrarReportes() {
@@ -157,7 +157,7 @@ public class DashboardController {
     }
 
     @FXML private void mostrarAsistenteIA() {
-        mostrarProximamente("🤖 Asistente IA");
+        cargarVista("/fxml/asistente_ia.fxml");
     }
 
     // =========================================

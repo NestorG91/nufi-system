@@ -4,59 +4,54 @@ import org.mindrot.jbcrypt.BCrypt;
 
 public class Usuario {
 
-    int id;
-    String nombre;
-    String usuario;
-    String contrasena;
-    String rol;
-    int activo;
+    // =========================================
+    // ATRIBUTOS
+    // =========================================
+    public int    id;
+    public String nombre;
+    public String usuario;
+    public String contrasena;
+    public String rol;
+    public int    activo;
 
-    // Constructor
-    public Usuario(String nombre, String usuario, String contrasena, String rol) {
-        this.nombre = nombre;
-        this.usuario = usuario;
+    // =========================================
+    // CONSTRUCTOR
+    // =========================================
+    public Usuario(String nombre, String usuario,
+                   String contrasena, String rol) {
+        this.nombre     = nombre;
+        this.usuario    = usuario;
         this.contrasena = encriptarContrasena(contrasena);
-        this.rol = rol;
-        this.activo = 1;
+        this.rol        = rol;
+        this.activo     = 1;
     }
 
-    // Encriptar contraseña
+    // =========================================
+    // MÉTODOS ESTÁTICOS
+    // =========================================
     public static String encriptarContrasena(String contrasena) {
         return BCrypt.hashpw(contrasena, BCrypt.gensalt());
     }
 
-    // Verificar contraseña
-    public static boolean verificarContrasena(String contrasenaIngresada, String hashGuardado) {
+    public static boolean verificarContrasena(
+            String contrasenaIngresada, String hashGuardado) {
         return BCrypt.checkpw(contrasenaIngresada, hashGuardado);
     }
 
-    // Mostrar info
+    // =========================================
+    // GETTERS
+    // =========================================
+    public int    getId()      { return id; }
+    public String getNombre()  { return nombre; }
+    public String getUsuario() { return usuario; }
+    public String getRol()     { return rol; }
+    public int    getActivo()  { return activo; }
+
     public void mostrarInf() {
         System.out.println(
-                "Usuario: " + usuario +
+                "Usuario: "  + usuario +
                         " | Nombre: " + nombre +
-                        " | Rol: " + rol
+                        " | Rol: "    + rol
         );
-    }
-
-    // GETTERS
-    public int getId() {
-        return id;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public String getUsuario() {
-        return usuario;
-    }
-
-    public String getRol() {
-        return rol;
-    }
-
-    public int getActivo() {
-        return activo;
     }
 }
