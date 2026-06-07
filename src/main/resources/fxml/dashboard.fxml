@@ -46,7 +46,7 @@
 
             <Region VBox.vgrow="ALWAYS"/>
             <Separator/>
-            <Label text="Finca La Quinta · Vereda Cordoncillar, Albania"
+            <Label text="Finca La Quinta · Vereda Cordoncillal, Albania"
                    styleClass="sidebar-footer"/>
         </VBox>
     </left>

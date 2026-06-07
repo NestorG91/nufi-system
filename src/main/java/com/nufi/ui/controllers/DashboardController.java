@@ -153,7 +153,7 @@ public class DashboardController {
     }
 
     @FXML private void mostrarReportes() {
-        mostrarProximamente("📊 Reportes");
+        cargarVista("/fxml/reportes.fxml");
     }
 
     @FXML private void mostrarAsistenteIA() {

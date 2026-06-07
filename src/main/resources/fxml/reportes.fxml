@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.nufi.ui.controllers.ReportesController"
+      spacing="20">
+
+    <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
+
+    <!-- ══ ENCABEZADO ══ -->
+    <HBox alignment="CENTER_LEFT">
+        <Label text="📊 Reportes y Exportación PDF"
+               styleClass="label-titulo"/>
+    </HBox>
+
+    <Label text="Selecciona el reporte que deseas generar"
+           styleClass="label-muted"/>
+
+    <!-- ══ TARJETAS DE REPORTES ══ -->
+    <HBox spacing="16" alignment="CENTER_LEFT">
+
+        <!-- Reporte Cosecha -->
+        <VBox styleClass="card" spacing="12"
+              prefWidth="220"
+              alignment="CENTER"
+              style="-fx-cursor:hand;">
+            <Label text="☕" style="-fx-font-size:36px;"/>
+            <Label text="Reporte de Cosecha"
+                   style="-fx-font-weight:bold; -fx-font-size:14px;"/>
+            <Label text="Lotes, cereza, pergamino y ganancias"
+                   styleClass="label-muted"
+                   textAlignment="CENTER"
+                   wrapText="true"/>
+            <Button text="📄 Generar PDF"
+                    styleClass="btn-primary"
+                    maxWidth="Infinity"
+                    onAction="#reporteCosecha"/>
+        </VBox>
+
+        <!-- Reporte Trabajadores -->
+        <VBox styleClass="card" spacing="12"
+              prefWidth="220"
+              alignment="CENTER"
+              style="-fx-cursor:hand;">
+            <Label text="👷" style="-fx-font-size:36px;"/>
+            <Label text="Reporte de Trabajadores"
+                   style="-fx-font-weight:bold; -fx-font-size:14px;"/>
+            <Label text="Historial de jornadas y pagos"
+                   styleClass="label-muted"
+                   textAlignment="CENTER"
+                   wrapText="true"/>
+            <Button text="📄 Generar PDF"
+                    styleClass="btn-primary"
+                    maxWidth="Infinity"
+                    onAction="#reporteTrabajadores"/>
+        </VBox>
+
+        <!-- Reporte Inventario -->
+        <VBox styleClass="card" spacing="12"
+              prefWidth="220"
+              alignment="CENTER"
+              style="-fx-cursor:hand;">
+            <Label text="📦" style="-fx-font-size:36px;"/>
+            <Label text="Reporte de Inventario"
+                   style="-fx-font-weight:bold; -fx-font-size:14px;"/>
+            <Label text="Stock actual y movimientos"
+                   styleClass="label-muted"
+                   textAlignment="CENTER"
+                   wrapText="true"/>
+            <Button text="📄 Generar PDF"
+                    styleClass="btn-primary"
+                    maxWidth="Infinity"
+                    onAction="#reporteInventario"/>
+        </VBox>
+
+        <!-- Reporte Lote específico -->
+        <VBox styleClass="card" spacing="12"
+              prefWidth="220"
+              alignment="CENTER"
+              style="-fx-cursor:hand;">
+            <Label text="🌿" style="-fx-font-size:36px;"/>
+            <Label text="Historial de Lote"
+                   style="-fx-font-weight:bold; -fx-font-size:14px;"/>
+            <Label text="Jornadas e insumos por lote"
+                   styleClass="label-muted"
+                   textAlignment="CENTER"
+                   wrapText="true"/>
+            <Button text="📄 Generar PDF"
+                    styleClass="btn-primary"
+                    maxWidth="Infinity"
+                    onAction="#reporteLote"/>
+        </VBox>
+
+    </HBox>
+
+    <!-- ══ LOG DE GENERACIÓN ══ -->
+    <VBox styleClass="card" spacing="8" VBox.vgrow="ALWAYS">
+        <Label text="📋 Historial de reportes generados"
+               style="-fx-font-weight:bold;"/>
+        <ListView fx:id="listaReportes" VBox.vgrow="ALWAYS"/>
+    </VBox>
+
+</VBox>
