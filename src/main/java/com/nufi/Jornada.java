@@ -6,16 +6,16 @@ public class Jornada {
     public String nombreTrabajador;
     public String nombreLote;
 
-    int trabajadorId;
-    int loteId;
-    String fecha;
-    String tipoTrabajo; // recoleccion, abono, siembra, guadaña
-    String modoPago; // por dia, kilo
-    double kilos;
-    double valorDia;
-    double valorKilo;
-    double totalPagar;
-    String observaciones;
+    public int trabajadorId;
+    public int loteId;
+    public String fecha;
+    public String tipoTrabajo; // recoleccion, abono, siembra, guadaña
+    public String modoPago; // por dia, kilo
+    public double kilos;
+    public double valorDia;
+    public double valorKilo;
+    public double totalPagar;
+    public String observaciones;
 
     //Se crea el contructor
 

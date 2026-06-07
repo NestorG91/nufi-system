@@ -118,6 +118,12 @@
                            promptText="Ej: 45000"
                            styleClass="nufi-input"/>
             </VBox>
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Kilos recogidos (opcional):"/>
+                <TextField fx:id="txtKilosDia"
+                           promptText="Ej: 30"
+                           styleClass="nufi-input"/>
+            </VBox>
         </HBox>
 
         <!-- Total calculado -->

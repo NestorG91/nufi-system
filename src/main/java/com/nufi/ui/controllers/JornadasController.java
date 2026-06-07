@@ -39,6 +39,7 @@ public class JornadasController {
     @FXML private Label        lblTotal;
     @FXML private TextField    txtObservaciones;
     @FXML private Label        lblError;
+    @FXML private TextField txtKilosDia;
 
     private final BaseDatos db = ConexionDB.getInstance();
     private List<Trabajador> listaTrabajadores;
@@ -75,16 +76,21 @@ public class JornadasController {
 
         // Columna acciones — ya está bien
         colAcciones.setCellFactory(col -> new TableCell<>() {
-            private final Button btnVer = new Button("👁 Ver");
+            private final Button btnVer = new Button("👁 Detalle");
             private final HBox box = new HBox(btnVer);
             {
                 box.setAlignment(javafx.geometry.Pos.CENTER);
                 btnVer.setStyle(
-                        "-fx-background-color:#2d6a4f;" +
+                        "-fx-background-color:#457b9d;" +
                                 "-fx-text-fill:white;" +
                                 "-fx-background-radius:6;" +
                                 "-fx-padding:4 10;" +
                                 "-fx-cursor:hand;");
+                btnVer.setOnAction(e -> {
+                    Jornada j = getTableView()
+                            .getItems().get(getIndex());
+                    verDetalleJornada(j);
+                });
             }
             @Override
             protected void updateItem(Void item, boolean empty) {
@@ -95,12 +101,12 @@ public class JornadasController {
 
         // Listeners modo pago
         cmbModoPago.valueProperty().addListener((obs, old, nuevo) -> {
-            if ("kilo".equals(nuevo)) {
+            if ("Kilo".equals(nuevo)) {
                 panelKilos.setVisible(true);
                 panelKilos.setManaged(true);
                 panelDia.setVisible(false);
                 panelDia.setManaged(false);
-            } else if ("dia".equals(nuevo)) {
+            } else if ("Día".equals(nuevo)) {
                 panelKilos.setVisible(false);
                 panelKilos.setManaged(false);
                 panelDia.setVisible(true);
@@ -112,6 +118,23 @@ public class JornadasController {
         txtKilos.textProperty().addListener((obs, old, n) -> calcularTotal());
         txtValorKilo.textProperty().addListener((obs, old, n) -> calcularTotal());
         txtValorDia.textProperty().addListener((obs, old, n) -> calcularTotal());
+    }
+
+    private void verDetalleJornada(Jornada j) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Detalle jornada");
+        alert.setHeaderText("📅 Jornada #" + j.id);
+        alert.setContentText(
+                "Trabajador:  " + j.nombreTrabajador + "\n" +
+                        "Lote:        " + j.nombreLote + "\n" +
+                        "Fecha:       " + j.fecha + "\n" +
+                        "Labor:       " + j.tipoTrabajo + "\n" +
+                        "Modo pago:   " + j.modoPago + "\n" +
+                        "Kilos:       " + j.kilos + " kg\n" +
+                        "─────────────────────────\n" +
+                        "TOTAL:  $" + String.format("%,.0f", j.totalPagar)
+        );
+        alert.showAndWait();
     }
 
     // ✅ Método helper igual que en Lotes y Trabajadores
@@ -152,12 +175,12 @@ public class JornadasController {
 
         // Tipos de trabajo
         cmbTipoTrabajo.setItems(FXCollections.observableArrayList(
-                "recoleccion", "abono", "siembra", "guadana"
+                "Recolección", "Abono", "Siembra", "Guadana"
         ));
 
         // Modo pago
         cmbModoPago.setItems(FXCollections.observableArrayList(
-                "kilo", "dia"
+                "Kilo", "Día"
         ));
     }
 
@@ -199,6 +222,7 @@ public class JornadasController {
         txtKilos.clear();
         txtValorKilo.clear();
         txtValorDia.clear();
+        txtKilosDia.clear();
         txtObservaciones.clear();
         lblTotal.setText("$0");
         ocultarError();
@@ -208,7 +232,8 @@ public class JornadasController {
 
     @FXML
     private void guardarJornada() {
-        // Validaciones
+
+        // Validaciones básicas primero
         if (cmbTrabajador.getValue() == null ||
                 cmbLote.getValue() == null ||
                 dpFecha.getValue() == null ||
@@ -216,6 +241,21 @@ public class JornadasController {
                 cmbModoPago.getValue() == null) {
             mostrarError("Completa todos los campos obligatorios.");
             return;
+        }
+
+        // Declarar tipo ANTES de usarlo
+        String tipo = cmbTipoTrabajo.getValue();
+        String modo = cmbModoPago.getValue();
+
+        // ✅ Validar cosecha activa si es recolección
+        if ("Recolección".equals(tipo)) {
+            int cosechaId = db.obtenerCosechaActivaId();
+            if (cosechaId == -1) {
+                mostrarError(
+                        "No hay cosecha activa. Inicia una cosecha " +
+                                "antes de registrar recolección.");
+                return;
+            }
         }
 
         // Obtener IDs
@@ -226,57 +266,51 @@ public class JornadasController {
                 .get(cmbLote.getSelectionModel()
                         .getSelectedIndex()).id;
 
-        String fecha    = dpFecha.getValue().toString();
-        String tipo     = cmbTipoTrabajo.getValue();
-        String modo     = cmbModoPago.getValue();
-        String obs      = txtObservaciones.getText().trim();
+        String fecha = dpFecha.getValue().toString();
+        String obs   = txtObservaciones.getText().trim();
 
         double kilos = 0, valorDia = 0, valorKilo = 0;
         try {
-            if ("kilo".equals(modo)) {
+            if ("Kilo".equals(modo)) {
                 kilos     = Double.parseDouble(txtKilos.getText());
                 valorKilo = Double.parseDouble(txtValorKilo.getText());
             } else {
                 valorDia = Double.parseDouble(txtValorDia.getText());
+                String kilosDiaStr = txtKilosDia.getText().trim();
+                if (!kilosDiaStr.isEmpty()) {
+                    kilos = Double.parseDouble(kilosDiaStr);
+                }
             }
         } catch (NumberFormatException e) {
             mostrarError("Ingresa valores numéricos válidos.");
             return;
         }
 
-        // Guardar jornada
         Jornada j = new Jornada(
                 trabajadorId, loteId, fecha,
                 tipo, modo, kilos, valorDia, valorKilo, obs
         );
         db.guardarJornada(j);
 
-        // ✅ Si es recolección → actualizar cosecha en proceso
-        if ("recoleccion".equals(tipo) && kilos > 0) {
+        // ✅ Si es recolección → actualizar cosecha
+        if ("Recolección".equals(tipo) && kilos > 0) {
             int cosechaId = db.obtenerCosechaActivaId();
-
             if (cosechaId != -1) {
                 int cosechaLoteId = db.obtenerCosechaLoteId(
                         cosechaId, loteId);
-
                 if (cosechaLoteId != -1) {
                     db.actualizarCerezaLote(cosechaLoteId, kilos);
-                    System.out.println("✅ Kilos actualizados en cosecha activa");
                 } else {
-                    // El lote no estaba en la cosecha — lo agregamos
                     CosechaLote cl = new CosechaLote(
-                            cosechaId, loteId, fecha
-                    );
+                            cosechaId, loteId, fecha);
                     cl.observaciones = "Agregado automáticamente";
                     db.guardarCosechaLote(cl);
-                    int nuevoId = db.obtenerCosechaLoteId(cosechaId, loteId);
+                    int nuevoId = db.obtenerCosechaLoteId(
+                            cosechaId, loteId);
                     if (nuevoId != -1) {
                         db.actualizarCerezaLote(nuevoId, kilos);
                     }
-                    System.out.println("✅ Lote agregado a cosecha activa");
                 }
-
-                // Notificar al usuario
                 mostrarAlertaCosecha(kilos, loteId);
             }
         }
@@ -300,6 +334,15 @@ public class JornadasController {
                         "al lote " + nombreLote + " en la cosecha activa."
         );
         alert.showAndWait();
+    }
+    private String estadoEmoji(String estado) {
+        return switch (estado) {
+            case "en_proceso" -> "● En proceso";
+            case "en_espera"  -> "|| En espera";
+            case "terminado"  -> "✓ Terminada";
+            case "pendiente"  -> "✗ Pendiente";
+            default           -> estado;
+        };
     }
 
     @FXML

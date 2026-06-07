@@ -20,21 +20,27 @@
                 onAction="#abrirFormularioNuevo"/>
     </HBox>
 
-    <!-- ══ TABLA COSECHAS ══ -->
+    <!-- ══ TABLA ══ -->
     <TableView fx:id="tablaCosechas" VBox.vgrow="ALWAYS">
         <columns>
             <TableColumn fx:id="colId"
-                         text="ID" prefWidth="50"/>
+                         text="ID" prefWidth="40"/>
             <TableColumn fx:id="colNombre"
-                         text="Cosecha" prefWidth="180"/>
+                         text="Cosecha" prefWidth="140"/>
             <TableColumn fx:id="colEstado"
                          text="Estado" prefWidth="110"/>
             <TableColumn fx:id="colFechaInicio"
-                         text="Fecha Inicio" prefWidth="120"/>
+                         text="Fecha Inicio" prefWidth="110"/>
+            <TableColumn fx:id="colFechaFin"
+                         text="Fecha Fin" prefWidth="110"/>
             <TableColumn fx:id="colCereza"
-                         text="Cereza kg" prefWidth="100"/>
-            <TableColumn fx:id="colPergamino"
-                         text="Pergamino kg" prefWidth="120"/>
+                         text="Cereza kg" prefWidth="90"/>
+            <TableColumn fx:id="colLotes"
+                         text="Lotes" prefWidth="140"/>
+            <TableColumn fx:id="colPergaminoProm"
+                         text="Perg. estimado" prefWidth="110"/>
+            <TableColumn fx:id="colPergaminoReal"
+                         text="Perg. real kg" prefWidth="110"/>
             <TableColumn fx:id="colAcciones"
                          text="Acciones" prefWidth="200"/>
         </columns>
