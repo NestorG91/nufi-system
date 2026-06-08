@@ -73,7 +73,9 @@
                     <TableColumn fx:id="colCPergamino"
                                  text="Pergamino est." prefWidth="130"/>
                     <TableColumn fx:id="colCFecha"
-                                 text="Fecha inicio" prefWidth="120"/>
+                                 text="Fecha Inicio" prefWidth="120"/>
+                    <TableColumn fx:id="colCFechaFin"
+                                 text="Fecha Fin" prefWidth="120"/>
                 </columns>
             </TableView>
         </Tab>

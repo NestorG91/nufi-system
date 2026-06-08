@@ -43,6 +43,7 @@ public class HistorialLoteController {
     @FXML private TableColumn<ObservableList<String>, String> colCCereza;
     @FXML private TableColumn<ObservableList<String>, String> colCPergamino;
     @FXML private TableColumn<ObservableList<String>, String> colCFecha;
+    @FXML private TableColumn<ObservableList<String>, String> colCFechaFin;
 
     // ── Resumen ──
     @FXML private Label lblResumenJornadas;
@@ -167,6 +168,8 @@ public class HistorialLoteController {
                 data -> new SimpleStringProperty(data.getValue().get(3)));
         colCFecha.setCellValueFactory(
                 data -> new SimpleStringProperty(data.getValue().get(4)));
+        colCFechaFin.setCellValueFactory(
+                data -> new SimpleStringProperty(data.getValue().get(5)));
 
         tablaCosechas.setColumnResizePolicy(
                 TableView.CONSTRAINED_RESIZE_POLICY);
@@ -176,7 +179,7 @@ public class HistorialLoteController {
         try {
             PreparedStatement ps = db.getConexion().prepareStatement(
                     "SELECT c.nombre, cl.estado, cl.total_cereza_kg, " +
-                            "cl.estimado_pergamino_kg, cl.fecha_inicio " +
+                            "cl.estimado_pergamino_kg, cl.fecha_inicio, cl.fecha_fin " +
                             "FROM cosecha_lotes cl " +
                             "JOIN cosecha c ON cl.cosecha_id = c.id " +
                             "WHERE cl.lote_id = ? ORDER BY cl.fecha_inicio DESC"
@@ -192,6 +195,8 @@ public class HistorialLoteController {
                 fila.add(String.format("%.1f", rs.getDouble("estimado_pergamino_kg")) + " kg");
                 fila.add(rs.getString("fecha_inicio") != null ?
                         rs.getString("fecha_inicio") : "—");
+                fila.add(rs.getString("fecha_fin") != null ?
+                        rs.getString("fecha_fin") : "En curso");
                 datos.add(fila);
             }
         } catch (Exception e) {
