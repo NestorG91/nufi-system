@@ -69,6 +69,9 @@
         <Button text="¿Cuánto debo pagar?"
                 styleClass="btn-secondary"
                 onAction="#preguntaRapida3"/>
+        <Button text="🌤️ ¿Clima hoy?"
+                styleClass="btn-secondary"
+                onAction="#preguntaRapida4"/>
     </HBox>
 
 </VBox>

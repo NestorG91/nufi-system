@@ -29,7 +29,8 @@
         <Label text="Contraseña:"/>
         <PasswordField fx:id="txtPassword"
                        promptText="Ingresa tu contraseña"
-                       styleClass="nufi-input"/>
+                       styleClass="nufi-input"
+                       onAction="#handleLogin"/>
 
         <!-- Error -->
         <Label fx:id="lblError"

@@ -26,7 +26,10 @@ public class AsistenteIA {
     // =========================================
     private final OkHttpClient cliente =
             new OkHttpClient.Builder()
-                    .callTimeout(Duration.ofSeconds(180))
+                    .callTimeout(Duration.ofSeconds(300)) // ← 5 minutos
+                    .connectTimeout(Duration.ofSeconds(30))
+                    .readTimeout(Duration.ofSeconds(300))
+                    .writeTimeout(Duration.ofSeconds(30))
                     .build();
 
     // =========================================
@@ -223,20 +226,118 @@ public class AsistenteIA {
     // Preguntar con datos reales de la BD
     public String preguntarConDatos(String pregunta, BaseDatos db, int usuarioId) {
 
-        String contextoBD = db.obtenerContextoCompletoIA();
-        String promptCompleto = contextoBD + "\n\nPREGUNTA DEL USUARIO:\n" + pregunta;
+        // ✅ Contexto reducido — solo lo esencial
+        String contextoBD = db.obtenerContextoReducidoIA();
+        String promptCompleto = contextoBD + "\n\nPREGUNTA:\n" + pregunta;
 
-        // Intentar hasta 3 veces si hay timeout
         String respuesta = "❌ Error IA: timeout";
         for (int intento = 1; intento <= 3; intento++) {
             respuesta = preguntar(promptCompleto);
-            if (!respuesta.startsWith("❌")) {
-                break; // Si funcionó salimos del ciclo
-            }
-            System.out.println("⏳ Reintentando... intento " + intento + " de 3");
+            if (!respuesta.startsWith("❌")) break;
+            System.out.println("⏳ Reintentando... intento " + intento);
         }
-// Guardar automáticamente en historial
         db.guardarChatHistorial(usuarioId, pregunta, respuesta);
         return respuesta;
+    }
+
+    public String obtenerClimaActual() {
+        try {
+            // ✅ Coordenadas exactas Finca La Quinta
+            String url = "https://api.open-meteo.com/v1/forecast?" +
+                    "latitude=5.8555&longitude=-73.7619" +
+                    "&current=temperature_2m,relative_humidity_2m," +
+                    "precipitation,weather_code,wind_speed_10m" +
+                    "&daily=temperature_2m_max,temperature_2m_min," +
+                    "precipitation_sum,weather_code" +
+                    "&timezone=America%2FBogota&forecast_days=3";
+
+            okhttp3.OkHttpClient cliente = new okhttp3.OkHttpClient();
+            okhttp3.Request request = new okhttp3.Request.Builder()
+                    .url(url)
+                    .build();
+
+            okhttp3.Response response = cliente.newCall(request).execute();
+            String json = response.body().string();
+
+            // Parsear con Gson
+            com.google.gson.JsonObject root =
+                    com.google.gson.JsonParser.parseString(json)
+                            .getAsJsonObject();
+
+            com.google.gson.JsonObject current =
+                    root.getAsJsonObject("current");
+            com.google.gson.JsonObject daily =
+                    root.getAsJsonObject("daily");
+
+            double temp     = current.get("temperature_2m").getAsDouble();
+            double humedad  = current.get("relative_humidity_2m").getAsDouble();
+            double lluvia   = current.get("precipitation").getAsDouble();
+            double viento   = current.get("wind_speed_10m").getAsDouble();
+            int    codigo   = current.get("weather_code").getAsInt();
+
+            // Pronóstico 3 días
+            com.google.gson.JsonArray fechas =
+                    daily.getAsJsonArray("time");
+            com.google.gson.JsonArray tempMax =
+                    daily.getAsJsonArray("temperature_2m_max");
+            com.google.gson.JsonArray tempMin =
+                    daily.getAsJsonArray("temperature_2m_min");
+            com.google.gson.JsonArray lluviaDia =
+                    daily.getAsJsonArray("precipitation_sum");
+            com.google.gson.JsonArray codigosDia =
+                    daily.getAsJsonArray("weather_code");
+
+            StringBuilder clima = new StringBuilder();
+            clima.append("🌤️ CLIMA — Vereda Cordoncillar, Albania\n");
+            clima.append("════════════════════════════════\n\n");
+            clima.append("📍 AHORA MISMO:\n");
+            clima.append("🌡️ Temperatura: ").append(temp).append("°C\n");
+            clima.append("💧 Humedad: ").append(humedad).append("%\n");
+            clima.append("🌧️ Lluvia: ").append(lluvia).append(" mm\n");
+            clima.append("💨 Viento: ").append(viento).append(" km/h\n");
+            clima.append("☁️ Condición: ")
+                    .append(interpretarCodigo(codigo)).append("\n\n");
+
+            clima.append("📅 PRÓXIMOS 3 DÍAS:\n");
+            for (int i = 0; i < 3; i++) {
+                clima.append("• ").append(fechas.get(i).getAsString())
+                        .append(": ").append(tempMin.get(i).getAsDouble())
+                        .append("°C / ").append(tempMax.get(i).getAsDouble())
+                        .append("°C | Lluvia: ")
+                        .append(lluviaDia.get(i).getAsDouble()).append(" mm | ")
+                        .append(interpretarCodigo(
+                                codigosDia.get(i).getAsInt())).append("\n");
+            }
+
+            // Recomendación para la finca
+            clima.append("\n🌱 PARA LA FINCA:\n");
+            if (lluvia > 5) {
+                clima.append("⚠️ Hay lluvia — evita fumigar hoy.\n");
+                clima.append("✅ Buen momento para abonar.\n");
+            } else if (temp > 28) {
+                clima.append("☀️ Día caluroso — ideal para secar café.\n");
+                clima.append("💧 Riega si los lotes lo necesitan.\n");
+            } else {
+                clima.append("✅ Buen día para labores en la finca.\n");
+                clima.append("☕ Condiciones favorables para recolección.\n");
+            }
+
+            return clima.toString();
+
+        } catch (Exception e) {
+            return "❌ No se pudo obtener el clima: " + e.getMessage();
+        }
+    }
+
+    private String interpretarCodigo(int codigo) {
+        if (codigo == 0)              return "Despejado ☀️";
+        if (codigo <= 3)              return "Parcialmente nublado 🌤️";
+        if (codigo <= 49)             return "Niebla 🌫️";
+        if (codigo <= 59)             return "Llovizna 🌦️";
+        if (codigo <= 69)             return "Lluvia 🌧️";
+        if (codigo <= 79)             return "Nieve 🌨️";
+        if (codigo <= 82)             return "Chubascos 🌧️";
+        if (codigo <= 99)             return "Tormenta ⛈️";
+        return "Desconocido";
     }
 }

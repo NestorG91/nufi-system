@@ -9,7 +9,6 @@ import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.scene.text.TextAlignment;
 
 public class AsistenteIAController {
 
@@ -18,24 +17,23 @@ public class AsistenteIAController {
     @FXML private HBox       panelEscribiendo;
     @FXML private TextField  txtPregunta;
 
-    private final BaseDatos  db = ConexionDB.getInstance();
+    private final BaseDatos   db = ConexionDB.getInstance();
     private final AsistenteIA ia = new AsistenteIA();
+    private String climaActual = "";
 
     @FXML
     public void initialize() {
-        // Mensaje de bienvenida
-        agregarMensajeIA(
-                "¡Hola! Soy NUFI IA ☕\n\n" +
-                        "Puedo ayudarte con información sobre:\n" +
-                        "• Estado de la cosecha actual\n" +
-                        "• Producción de pergamino estimada\n" +
-                        "• Stock del inventario\n" +
-                        "• Pagos pendientes a trabajadores\n\n" +
-                        "¿En qué te puedo ayudar hoy?"
-        );
-
-        // Cargar historial previo
-        cargarHistorial();
+        new Thread(() -> {
+            climaActual = ia.obtenerClimaActual();
+            Platform.runLater(() -> {
+                agregarMensajeIA(
+                        "¡Hola! Soy NUFI IA ☕\n\n" +
+                                climaActual + "\n" +
+                                "¿En qué te puedo ayudar hoy?"
+                );
+                cargarHistorial();
+            });
+        }, "nufi-clima-thread").start();
     }
 
     private void cargarHistorial() {
@@ -67,15 +65,56 @@ public class AsistenteIAController {
         agregarMensajeUsuario(pregunta);
         mostrarEscribiendo(true);
 
-        // Llamar IA en hilo separado
+        String lower = pregunta.toLowerCase();
+        boolean esClima = (lower.contains("clima") &&
+                (lower.contains("hoy") ||
+                        lower.contains("actual") ||
+                        lower.contains("ahora"))) ||
+                lower.equals("clima") ||
+                lower.contains("temperatura actual") ||
+                lower.contains("como esta el tiempo") ||
+                lower.contains("cómo está el tiempo") ||
+                lower.contains("va a llover") ||
+                lower.contains("va llover");
+
+        if (esClima) {
+            new Thread(() -> {
+                String clima = ia.obtenerClimaActual();
+                Platform.runLater(() -> {
+                    mostrarEscribiendo(false);
+                    agregarMensajeIA(clima);
+                    scrollAlFinal();
+                });
+            }, "nufi-clima-thread").start();
+            return;
+        }
+
+        // ✅ Claude API con resumen corto del clima
         new Thread(() -> {
             int usuarioId = SesionUsuario.getUsuario() != null ?
                     SesionUsuario.getUsuario().id : 1;
 
-            String respuesta = ia.preguntarConDatos(
-                    pregunta, db, usuarioId
-            );
+            String preguntaConClima = pregunta;
+            if (!climaActual.isEmpty()) {
+                // ✅ Solo líneas clave del clima
+                String climaResumen = climaActual
+                        .lines()
+                        .filter(l -> l.contains("Temperatura") ||
+                                l.contains("Lluvia") ||
+                                l.contains("Condición") ||
+                                l.contains("Humedad") ||
+                                l.contains("PRÓXIMOS"))
+                        .limit(6)
+                        .reduce("", (a, b) -> a + b + "\n");
 
+                preguntaConClima =
+                        "CLIMA HOY EN LA FINCA (Albania, Santander):\n" +
+                                climaResumen + "\n" +
+                                "PREGUNTA:\n" + pregunta;
+            }
+
+            String respuesta = ia.preguntarConDatos(
+                    preguntaConClima, db, usuarioId);
             Platform.runLater(() -> {
                 mostrarEscribiendo(false);
                 agregarMensajeIA(respuesta);
@@ -85,7 +124,6 @@ public class AsistenteIAController {
     }
 
     private void agregarMensajeUsuario(String texto) {
-        // Burbuja usuario — derecha
         Label lblMensaje = new Label(texto);
         lblMensaje.setWrapText(true);
         lblMensaje.setMaxWidth(420);
@@ -96,11 +134,9 @@ public class AsistenteIAController {
                         "-fx-padding:10 14;" +
                         "-fx-font-size:13px;"
         );
-
         HBox contenedor = new HBox(lblMensaje);
         contenedor.setAlignment(Pos.CENTER_RIGHT);
 
-        // Nombre usuario
         Label lblNombre = new Label("Tú");
         lblNombre.setStyle(
                 "-fx-font-size:10px;" +
@@ -116,26 +152,24 @@ public class AsistenteIAController {
     }
 
     private void agregarMensajeIA(String texto) {
-        // Burbuja IA — izquierda
-        Label lblMensaje = new Label(texto);
-        lblMensaje.setWrapText(true);
-        lblMensaje.setMaxWidth(420);
-        lblMensaje.setTextAlignment(TextAlignment.LEFT);
-        lblMensaje.setStyle(
+        TextArea txtMensaje = new TextArea(texto);
+        txtMensaje.setWrapText(true);
+        txtMensaje.setEditable(false);
+        txtMensaje.setMaxWidth(500);
+        txtMensaje.setPrefWidth(500);
+        txtMensaje.setPrefRowCount(
+                Math.min(texto.split("\n").length + 1, 20));
+        txtMensaje.setStyle(
                 "-fx-background-color:#f0f4f0;" +
-                        "-fx-text-fill:#1a1a1a;" +
-                        "-fx-background-radius:12 12 12 2;" +
-                        "-fx-padding:10 14;" +
-                        "-fx-font-size:13px;" +
                         "-fx-border-color:#d4e8d4;" +
-                        "-fx-border-radius:12 12 12 2;" +
-                        "-fx-border-width:1;"
+                        "-fx-border-radius:12;" +
+                        "-fx-background-radius:12;" +
+                        "-fx-font-size:13px;" +
+                        "-fx-control-inner-background:#f0f4f0;"
         );
-
-        HBox contenedor = new HBox(lblMensaje);
+        HBox contenedor = new HBox(txtMensaje);
         contenedor.setAlignment(Pos.CENTER_LEFT);
 
-        // Nombre IA
         Label lblNombre = new Label("🤖 NUFI IA");
         lblNombre.setStyle(
                 "-fx-font-size:10px;" +
@@ -157,8 +191,7 @@ public class AsistenteIAController {
     }
 
     private void scrollAlFinal() {
-        Platform.runLater(() ->
-                scrollChat.setVvalue(1.0));
+        Platform.runLater(() -> scrollChat.setVvalue(1.0));
     }
 
     @FXML
@@ -199,5 +232,18 @@ public class AsistenteIAController {
         txtPregunta.setText(
                 "¿Cuánto dinero debo pagar a los trabajadores?");
         enviarPregunta();
+    }
+
+    @FXML
+    private void preguntaRapida4() {
+        mostrarEscribiendo(true);
+        new Thread(() -> {
+            String clima = ia.obtenerClimaActual();
+            Platform.runLater(() -> {
+                mostrarEscribiendo(false);
+                agregarMensajeIA(clima);
+                scrollAlFinal();
+            });
+        }, "nufi-clima-thread").start();
     }
 }

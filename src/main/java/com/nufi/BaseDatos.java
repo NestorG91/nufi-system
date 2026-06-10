@@ -1160,6 +1160,59 @@ public class BaseDatos {
         return contexto.toString();
     }
 
+    public String obtenerContextoReducidoIA() {
+        StringBuilder ctx = new StringBuilder();
+        ctx.append("FINCA LA QUINTA — Datos clave:\n");
+        try {
+            // Solo cosecha activa
+            ResultSet rs = conexion.createStatement().executeQuery(
+                    "SELECT nombre, estado FROM cosecha " +
+                            "WHERE estado='en_proceso' LIMIT 1"
+            );
+            if (rs.next()) {
+                ctx.append("Cosecha activa: ")
+                        .append(rs.getString("nombre")).append("\n");
+            }
+
+            // Solo stock bajo
+            ResultSet rs2 = conexion.createStatement().executeQuery(
+                    "SELECT nombre, stock_actual, stock_minimo " +
+                            "FROM productos_bodega " +
+                            "WHERE stock_actual <= stock_minimo AND activo=1"
+            );
+            ctx.append("Stock bajo: ");
+            boolean hayStock = false;
+            while (rs2.next()) {
+                ctx.append(rs2.getString("nombre")).append(" ");
+                hayStock = true;
+            }
+            if (!hayStock) ctx.append("ninguno");
+            ctx.append("\n");
+
+            // Pagos pendientes
+            ResultSet rs3 = conexion.createStatement().executeQuery(
+                    "SELECT t.nombre, " +
+                            "COALESCE(SUM(j.total_pagar),0) as total " +
+                            "FROM trabajadores t " +
+                            "JOIN jornadas j ON t.id=j.trabajador_id " +
+                            "WHERE j.id NOT IN " +
+                            "(SELECT jornada_id FROM tiquetes) " +
+                            "GROUP BY t.id"
+            );
+            ctx.append("Pagos pendientes:\n");
+            while (rs3.next()) {
+                ctx.append("- ").append(rs3.getString("nombre"))
+                        .append(": $").append(
+                                String.format("%,.0f",
+                                        rs3.getDouble("total")))
+                        .append("\n");
+            }
+        } catch (Exception e) {
+            System.out.println("❌ Contexto reducido: " + e.getMessage());
+        }
+        return ctx.toString();
+    }
+
     // Obtener lista de productos activos
     public java.util.List<Producto> obtenerProductos() {
         java.util.List<Producto> lista = new java.util.ArrayList<>();
