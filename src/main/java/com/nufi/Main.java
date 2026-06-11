@@ -11,6 +11,10 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
 
+        // ✅ Formato colombiano en toda la app
+        java.util.Locale.setDefault(
+                java.util.Locale.forLanguageTag("es-CO"));
+
         // ✅ Inicializar BD siempre al arrancar
         BaseDatos bd = ConexionDB.getInstance();
         bd.inicializarBD();
@@ -23,7 +27,8 @@ public class Main extends Application {
 
         Scene scene = new Scene(root, 900, 600);
         scene.getStylesheets().add(
-                getClass().getResource("/css/nufi-theme.css").toExternalForm()
+                getClass().getResource("/css/nufi-theme.css")
+                        .toExternalForm()
         );
 
         stage.setTitle("NUFI — Finca La Quinta");

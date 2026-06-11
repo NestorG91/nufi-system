@@ -24,14 +24,14 @@ public class InventarioController {
     @FXML private TableColumn<Producto, String>  colEstado;
     @FXML private TableColumn<Producto, Void>    colAcciones;
 
-    @FXML private VBox      panelFormulario;
-    @FXML private TextField txtNombre;
+    @FXML private VBox             panelFormulario;
+    @FXML private TextField        txtNombre;
     @FXML private ComboBox<String> cmbTipo;
     @FXML private ComboBox<String> cmbUnidad;
-    @FXML private TextField txtStock;
-    @FXML private TextField txtMinimo;
-    @FXML private TextField txtPrecio;
-    @FXML private Label     lblError;
+    @FXML private TextField        txtStock;
+    @FXML private TextField        txtMinimo;
+    @FXML private TextField        txtPrecio;
+    @FXML private Label            lblError;
 
     private final BaseDatos db = ConexionDB.getInstance();
     private Producto productoEditando = null;
@@ -47,10 +47,11 @@ public class InventarioController {
 
     private void configurarCombos() {
         cmbTipo.setItems(FXCollections.observableArrayList(
-                "abono", "veneno", "herramienta", "fertilizante", "otro"
+                "Abono", "Veneno", "Herramienta",
+                "Fertilizante", "otro"
         ));
         cmbUnidad.setItems(FXCollections.observableArrayList(
-                "bultos", "litros", "kilos", "unidad", "metros"
+                "Bultos", "Litros", "Kilos", "Unidad", "Metros"
         ));
     }
 
@@ -70,7 +71,58 @@ public class InventarioController {
         colPrecio.setCellValueFactory(
                 new PropertyValueFactory<>("precioUnidad"));
 
-        // Columna estado con alerta
+        centrarColumna(colId);
+        centrarColumna(colNombre);
+        centrarColumna(colTipo);
+        centrarColumna(colUnidad);
+
+        // ✅ Stock sin decimales
+        colStock.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(String.valueOf(item.intValue()));
+                    setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                    setStyle("-fx-padding: 0 0 0 12;");
+                }
+            }
+        });
+
+        // ✅ Mínimo sin decimales
+        colMinimo.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(String.valueOf(item.intValue()));
+                    setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                    setStyle("-fx-padding: 0 0 0 12;");
+                }
+            }
+        });
+
+        // ✅ Precio con formato colombiano $120.000
+        colPrecio.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText("$" + String.format("%,.0f", item)
+                            .replace(",", "."));
+                    setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                    setStyle("-fx-padding: 0 0 0 12;");
+                }
+            }
+        });
+
+        // ✅ Estado con color
         colEstado.setCellFactory(col -> new TableCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -96,20 +148,13 @@ public class InventarioController {
             }
         });
 
-        centrarColumna(colId);
-        centrarColumna(colNombre);
-        centrarColumna(colTipo);
-        centrarColumna(colUnidad);
-        centrarColumna(colStock);
-        centrarColumna(colMinimo);
-        centrarColumna(colPrecio);
-
-        // Columna acciones
+        // ✅ Columna acciones
         colAcciones.setCellFactory(col -> new TableCell<>() {
             private final Button btnEditar  = new Button("✏️ Editar");
             private final Button btnEntrada = new Button("➕");
             private final Button btnSalida  = new Button("➖");
-            private final HBox box = new HBox(4, btnEditar, btnEntrada, btnSalida);
+            private final HBox box = new HBox(4,
+                    btnEditar, btnEntrada, btnSalida);
 
             {
                 box.setAlignment(javafx.geometry.Pos.CENTER);
@@ -200,7 +245,8 @@ public class InventarioController {
 
     private void registrarMovimiento(Producto p, String tipo) {
         TextInputDialog dialog = new TextInputDialog("1");
-        dialog.setTitle(tipo.equals("entrada") ? "➕ Entrada de stock" : "➖ Salida de stock");
+        dialog.setTitle(tipo.equals("entrada") ?
+                "➕ Entrada de stock" : "➖ Salida de stock");
         dialog.setHeaderText("Producto: " + p.nombre);
         dialog.setContentText("Cantidad a " + tipo + ":");
 
@@ -210,26 +256,23 @@ public class InventarioController {
                 String fecha = java.time.LocalDate.now().toString();
 
                 if (tipo.equals("salida")) {
-                    // ✅ Preguntar si se usa en un lote
                     preguntarLoteParaSalida(p, cantidad, fecha);
                 } else {
-                    // Entrada directa sin lote
                     db.registrarMovimientoSinLote(
                             p.id, tipo, cantidad, fecha, "Entrada manual"
                     );
                     cargarProductos();
                 }
-
             } catch (NumberFormatException ex) {
                 mostrarError("Ingresa un número válido.");
             }
         });
     }
 
-    private void preguntarLoteParaSalida(Producto p, double cantidad, String fecha) {
-
-        // Construir opciones de lotes
-        java.util.List<com.nufi.Lote> lotes = db.obtenerLotesConKilos();
+    private void preguntarLoteParaSalida(
+            Producto p, double cantidad, String fecha) {
+        java.util.List<com.nufi.Lote> lotes =
+                db.obtenerLotesConKilos();
 
         ChoiceDialog<String> dialogLote = new ChoiceDialog<>(
                 "Sin lote específico",
@@ -243,8 +286,6 @@ public class InventarioController {
         dialogLote.showAndWait().ifPresent(opcion -> {
             int loteId = 0;
             String obs = "Salida manual";
-
-            // Buscar el lote seleccionado
             for (com.nufi.Lote lote : lotes) {
                 if (opcion.startsWith(lote.nombre)) {
                     loteId = lote.id;
@@ -252,15 +293,12 @@ public class InventarioController {
                     break;
                 }
             }
-
             if (loteId > 0) {
                 db.registrarMovimiento(
-                        p.id, loteId, "salida", cantidad, fecha, obs
-                );
+                        p.id, loteId, "salida", cantidad, fecha, obs);
             } else {
                 db.registrarMovimientoSinLote(
-                        p.id, "salida", cantidad, fecha, "Salida sin lote"
-                );
+                        p.id, "salida", cantidad, fecha, "Salida sin lote");
             }
             cargarProductos();
         });
@@ -278,15 +316,16 @@ public class InventarioController {
 
     @FXML
     private void guardarProducto() {
-        String nombre = txtNombre.getText().trim();
-        String tipo   = cmbTipo.getValue();
-        String unidad = cmbUnidad.getValue();
+        String nombre    = txtNombre.getText().trim();
+        String tipo      = cmbTipo.getValue();
+        String unidad    = cmbUnidad.getValue();
         String stockStr  = txtStock.getText().trim();
         String minimoStr = txtMinimo.getText().trim();
         String precioStr = txtPrecio.getText().trim();
 
         if (nombre.isEmpty() || tipo == null || unidad == null ||
-                stockStr.isEmpty() || minimoStr.isEmpty() || precioStr.isEmpty()) {
+                stockStr.isEmpty() || minimoStr.isEmpty() ||
+                precioStr.isEmpty()) {
             mostrarError("Completa todos los campos.");
             return;
         }
@@ -307,9 +346,8 @@ public class InventarioController {
                     nombre, tipo, unidad, stock, minimo, precio
             );
         } else {
-            db.guardarProducto(
-                    new Producto(nombre, tipo, unidad, stock, minimo, precio)
-            );
+            db.guardarProducto(new Producto(
+                    nombre, tipo, unidad, stock, minimo, precio));
         }
 
         cancelar();

@@ -241,6 +241,7 @@ public class BaseDatos {
         crearTablaUsuarios();
         crearTablaChatHistorial();
         crearUsuariosIniciales();
+        crearTrabajadorDuenos();
         System.out.println("✅ Base de datos NUFI inicializada correctamente");
     }
 
@@ -260,7 +261,24 @@ public class BaseDatos {
             return false;
         }
     }
-
+    // ✅ Trabajador especial dueños de finca
+    private void crearTrabajadorDuenos() {
+        try {
+            ResultSet rs = conexion.createStatement().executeQuery(
+                    "SELECT id FROM trabajadores WHERE nombre='Dueño Finca'"
+            );
+            if (!rs.next()) {
+                conexion.createStatement().executeUpdate(
+                        "INSERT INTO trabajadores " +
+                                "(nombre, cedula, telefono) " +
+                                "VALUES ('Dueño Finca', '000000', '000000')"
+                );
+                System.out.println("✅ Trabajador Dueño Finca creado");
+            }
+        } catch (Exception e) {
+            System.out.println("❌ " + e.getMessage());
+        }
+    }
     public void guardarLote(Lote lote) {
         try {
             if (loteExiste(lote.nombre)) {

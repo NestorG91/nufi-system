@@ -55,14 +55,22 @@ public class JornadasController {
     }
 
     private void configurarColumnas() {
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
-        colTrabajador.setCellValueFactory(new PropertyValueFactory<>("nombreTrabajador"));
-        colLote.setCellValueFactory(new PropertyValueFactory<>("nombreLote"));
-        colFecha.setCellValueFactory(new PropertyValueFactory<>("fecha"));
-        colTipo.setCellValueFactory(new PropertyValueFactory<>("tipoTrabajo"));
-        colPago.setCellValueFactory(new PropertyValueFactory<>("modoPago"));
-        colKilos.setCellValueFactory(new PropertyValueFactory<>("kilos"));
-        colTotal.setCellValueFactory(new PropertyValueFactory<>("totalPagar"));
+        colId.setCellValueFactory(
+                new PropertyValueFactory<>("id"));
+        colTrabajador.setCellValueFactory(
+                new PropertyValueFactory<>("nombreTrabajador"));
+        colLote.setCellValueFactory(
+                new PropertyValueFactory<>("nombreLote"));
+        colFecha.setCellValueFactory(
+                new PropertyValueFactory<>("fecha"));
+        colTipo.setCellValueFactory(
+                new PropertyValueFactory<>("tipoTrabajo"));
+        colPago.setCellValueFactory(
+                new PropertyValueFactory<>("modoPago"));
+        colKilos.setCellValueFactory(
+                new PropertyValueFactory<>("kilos"));
+        colTotal.setCellValueFactory(
+                new PropertyValueFactory<>("totalPagar"));
 
         // ✅ Centrar texto en todas las columnas
         centrarColumna(colId);
@@ -73,6 +81,37 @@ public class JornadasController {
         centrarColumna(colPago);
         centrarColumna(colKilos);
         centrarColumna(colTotal);
+
+        // ✅ Kilos sin decimales
+        colKilos.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(String.valueOf(item.intValue()));
+                    setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                    setStyle("-fx-padding: 0 0 0 12;");
+                }
+            }
+        });
+
+        // ✅ Total con formato colombiano $72.000
+        colTotal.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText("$" + String.format("%,.0f", item)
+                            .replace(",", "."));
+                    setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                    setStyle("-fx-padding: 0 0 0 12;");
+                }
+            }
+        });
 
         // Columna acciones — ya está bien
         colAcciones.setCellFactory(col -> new TableCell<>() {

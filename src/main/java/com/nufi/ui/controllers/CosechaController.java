@@ -1,10 +1,6 @@
 package com.nufi.ui.controllers;
 
-import com.nufi.BaseDatos;
-import com.nufi.ConexionDB;
-import com.nufi.Cosecha;
-import com.nufi.CosechaLote;
-import com.nufi.Lote;
+import com.nufi.*;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -363,8 +359,9 @@ public class CosechaController {
 
     private void registrarKilos(int cosechaId, String nombre) {
         try {
+            // Obtener lotes activos
             PreparedStatement ps = db.getConexion().prepareStatement(
-                    "SELECT cl.id, l.nombre as lote " +
+                    "SELECT cl.id, l.nombre as lote, l.id as lote_id " +
                             "FROM cosecha_lotes cl " +
                             "JOIN lotes l ON cl.lote_id=l.id " +
                             "WHERE cl.cosecha_id=? AND cl.estado != 'terminado'"
@@ -372,11 +369,14 @@ public class CosechaController {
             ps.setInt(1, cosechaId);
             ResultSet rs = ps.executeQuery();
 
-            List<String>  opciones = new ArrayList<>();
-            List<Integer> ids      = new ArrayList<>();
+            List<String>  opciones  = new ArrayList<>();
+            List<Integer> ids       = new ArrayList<>();
+            List<Integer> loteIds   = new ArrayList<>();
+
             while (rs.next()) {
                 opciones.add(rs.getString("lote"));
                 ids.add(rs.getInt("id"));
+                loteIds.add(rs.getInt("lote_id"));
             }
 
             if (opciones.isEmpty()) {
@@ -386,6 +386,7 @@ public class CosechaController {
                 return;
             }
 
+            // Seleccionar lote
             ChoiceDialog<String> dialogLote = new ChoiceDialog<>(
                     opciones.get(0), opciones);
             dialogLote.setTitle("Registrar kilos");
@@ -393,24 +394,70 @@ public class CosechaController {
             dialogLote.setContentText("¿En qué lote?");
 
             dialogLote.showAndWait().ifPresent(loteElegido -> {
-                int cosechaLoteId = ids.get(
-                        opciones.indexOf(loteElegido));
+                int idx           = opciones.indexOf(loteElegido);
+                int cosechaLoteId = ids.get(idx);
+                int loteId        = loteIds.get(idx);
 
-                TextInputDialog dialogKilos =
-                        new TextInputDialog("0");
+                // Ingresar kilos
+                TextInputDialog dialogKilos = new TextInputDialog("0");
                 dialogKilos.setTitle("Kilos de cereza");
                 dialogKilos.setHeaderText("Lote: " + loteElegido);
                 dialogKilos.setContentText("Kilos recogidos:");
 
                 dialogKilos.showAndWait().ifPresent(kilosStr -> {
                     try {
-                        double kilos = Double.parseDouble(
-                                kilosStr.trim());
-                        db.actualizarCerezaLote(cosechaLoteId, kilos);
-                        cargarCosechas();
-                        new Alert(Alert.AlertType.INFORMATION,
-                                "✅ " + kilos + " kg en " + loteElegido)
-                                .showAndWait();
+                        double kilos = Double.parseDouble(kilosStr.trim());
+
+                        // ✅ Seleccionar quién recogió
+                        List<String> trabajadores = new ArrayList<>();
+                        List<Integer> trabIds = new ArrayList<>();
+                        try {
+                            ResultSet rst = db.getConexion()
+                                    .createStatement().executeQuery(
+                                            "SELECT id, nombre FROM trabajadores " +
+                                                    "ORDER BY nombre"
+                                    );
+                            while (rst.next()) {
+                                trabajadores.add(rst.getString("nombre"));
+                                trabIds.add(rst.getInt("id"));
+                            }
+                        } catch (Exception e) {
+                            System.out.println("❌ " + e.getMessage());
+                        }
+
+                        String primero = trabajadores.isEmpty() ?
+                                "" : trabajadores.get(0);
+                        ChoiceDialog<String> dialogTrab =
+                                new ChoiceDialog<>(primero, trabajadores);
+                        dialogTrab.setTitle("¿Quién recogió?");
+                        dialogTrab.setHeaderText(
+                                loteElegido + " — " + kilos + " kg");
+                        dialogTrab.setContentText("Trabajador:");
+
+                        dialogTrab.showAndWait().ifPresent(trabElegido -> {
+                            int trabId = trabIds.get(
+                                    trabajadores.indexOf(trabElegido));
+
+                            // Actualizar cereza en cosecha
+                            db.actualizarCerezaLote(cosechaLoteId, kilos);
+
+                            // ✅ Registrar jornada automáticamente
+                            String fecha = java.time.LocalDate.now().toString();
+                            Jornada j = new Jornada(
+                                    trabId, loteId, fecha,
+                                    "Recolección", "Día",
+                                    kilos, 0, 0, "Registrado desde cosecha"
+                            );
+                            db.guardarJornada(j);
+
+                            cargarCosechas();
+                            new Alert(Alert.AlertType.INFORMATION,
+                                    "✅ " + kilos + " kg registrados\n" +
+                                            "Trabajador: " + trabElegido + "\n" +
+                                            "Lote: " + loteElegido)
+                                    .showAndWait();
+                        });
+
                     } catch (NumberFormatException ex) {
                         new Alert(Alert.AlertType.ERROR,
                                 "Ingresa un número válido.")
