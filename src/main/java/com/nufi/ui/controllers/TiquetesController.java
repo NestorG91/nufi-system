@@ -36,6 +36,8 @@ public class TiquetesController {
     @FXML private VBox             panelJornadas;
     @FXML private Label            lblTotalPagar;
     @FXML private Label            lblError;
+    @FXML private ComboBox<String> cmbMedioPago;
+    @FXML private TextArea         txtObservaciones;
 
     private final BaseDatos    db = ConexionDB.getInstance();
     private List<Trabajador>   listaTrabajadores;
@@ -171,6 +173,15 @@ public class TiquetesController {
     private void abrirGenerarPago() {
         cmbTrabajador.setValue(null);
         dpFechaPago.setValue(LocalDate.now());
+
+        // Opciones de medio de pago (solo se llenan una vez)
+        if (cmbMedioPago.getItems().isEmpty()) {
+            cmbMedioPago.getItems().addAll(
+                    "Efectivo", "Transferencia", "Nequi", "Daviplata", "Otro");
+        }
+        cmbMedioPago.setValue(null);
+        txtObservaciones.clear();
+
         panelJornadas.getChildren().clear();
         checkboxJornadas.clear();
         idsJornadas.clear();
@@ -289,10 +300,17 @@ public class TiquetesController {
             }
         }
 
+        // Datos de pago capturados en el panel
+        String medioPago = cmbMedioPago.getValue() != null
+                ? cmbMedioPago.getValue() : "";
+        String observaciones = txtObservaciones.getText() != null
+                ? txtObservaciones.getText().trim() : "";
+
         // Generar tiquete por cada jornada seleccionada
         for (int jornadaId : seleccionadas) {
             guardarTiquete(jornadaId, trab.id, fechaPago,
-                    totalGeneral / seleccionadas.size());
+                    totalGeneral / seleccionadas.size(),
+                    medioPago, observaciones);
         }
 
         // Mostrar resumen
@@ -304,22 +322,40 @@ public class TiquetesController {
     }
 
     private void guardarTiquete(int jornadaId, int trabajadorId,
-                                String fecha, double total) {
+                                String fecha, double total,
+                                String medioPago, String observaciones) {
         try {
             int numero = db.siguienteNumeroTiquete();
             PreparedStatement ps = db.getConexion().prepareStatement(
                     "INSERT INTO tiquetes (numero_tiquete, jornada_id, " +
-                            "trabajador_id, fecha_pago, total_pagado, impreso) " +
-                            "VALUES (?, ?, ?, ?, ?, 1)"
+                            "trabajador_id, fecha_pago, total_pagado, " +
+                            "medio_pago, observaciones, impreso) " +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, 1)"
             );
             ps.setInt(1, numero);
             ps.setInt(2, jornadaId);
             ps.setInt(3, trabajadorId);
             ps.setString(4, fecha);
             ps.setDouble(5, total);
+            ps.setString(6, medioPago);
+            ps.setString(7, observaciones);
             ps.executeUpdate();
         } catch (Exception e) {
+            // No silenciar: si la BD aun no tiene las columnas medio_pago u
+            // observaciones (por migracion fallida) el usuario lo veria como
+            // "el tiquete no se guarda". Mostrar Alert para que sea evidente.
             System.out.println("❌ Error guardar tiquete: " + e.getMessage());
+            e.printStackTrace();
+            Alert err = new Alert(Alert.AlertType.ERROR);
+            err.setTitle("Error al guardar tiquete");
+            err.setHeaderText("❌ No se pudo guardar el tiquete");
+            err.setContentText(
+                    "Detalle: " + e.getMessage() + "\n\n" +
+                            "Si el mensaje habla de columnas faltantes " +
+                            "(medio_pago / observaciones), cierra la aplicacion " +
+                            "y vuelvela a abrir: la migracion automatica las creara."
+            );
+            err.showAndWait();
         }
     }
 
@@ -356,10 +392,13 @@ public class TiquetesController {
                     fila.get(2),   // fecha pago
                     fila.get(3),   // labor
                     fila.get(4),   // lote
-                    datosExtra[0], // modo pago
+                    datosExtra[0], // modo pago (kilo/dia)
                     datosExtra[1], // kilos
                     fila.get(5),   // total
-                    fila.get(6)    // estado
+                    fila.get(6),   // estado
+                    datosExtra[2], // medio de pago (efectivo/nequi...)
+                    datosExtra[3], // observaciones
+                    datosExtra[4]  // cedula
             );
 
             javafx.stage.Stage stage = new javafx.stage.Stage();
@@ -379,23 +418,31 @@ public class TiquetesController {
         String numLimpio = numero.replace("N°", "").trim();
         try {
             PreparedStatement ps = db.getConexion().prepareStatement(
-                    "SELECT j.modo_pago, j.kilos " +
+                    "SELECT j.modo_pago, j.kilos, t.medio_pago, " +
+                            "t.observaciones, tr.cedula " +
                             "FROM tiquetes t " +
                             "JOIN jornadas j ON t.jornada_id = j.id " +
+                            "JOIN trabajadores tr ON t.trabajador_id = tr.id " +
                             "WHERE t.numero_tiquete = ?"
             );
             ps.setInt(1, Integer.parseInt(numLimpio));
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
+                String medio = rs.getString("medio_pago");
+                String obs   = rs.getString("observaciones");
+                String ced   = rs.getString("cedula");
                 return new String[]{
                         rs.getString("modo_pago"),
-                        String.valueOf(rs.getDouble("kilos"))
+                        String.valueOf(rs.getDouble("kilos")),
+                        medio != null ? medio : "",
+                        obs != null ? obs : "",
+                        ced != null ? ced : ""
                 };
             }
         } catch (Exception e) {
             System.out.println("❌ Error datos extra: " + e.getMessage());
         }
-        return new String[]{"dia", "0.0"};
+        return new String[]{"dia", "0.0", "", "", ""};
     }
 
     @FXML

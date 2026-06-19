@@ -59,7 +59,7 @@ public class AsistenteIA {
                             "caficultura colombiana. " +
 
                             "Trabajas para la finca La Quinta ubicada en " +
-                            "Vereda Cordoncillar, Albania, Santander, Colombia. " +
+                            "Vereda Cordoncillal, Albania, Santander, Colombia. " +
 
                             "La finca pertenece a Filimon y Nubia. " +
 
@@ -80,7 +80,14 @@ public class AsistenteIA {
                             "- responde claro y práctico\n" +
                             "- usa lenguaje sencillo\n" +
                             "- evita respuestas extremadamente técnicas\n" +
-                            "- da recomendaciones útiles";
+                            "- da recomendaciones útiles\n" +
+                            "- NUNCA inventes datos. Solo usa la información del bloque " +
+                            "'FINCA LA QUINTA — Datos clave' que viene en el contexto.\n" +
+                            "- La 'COSECHA ACTIVA' es ÚNICAMENTE la que aparece como tal " +
+                            "en el contexto. Si dice 'NINGUNA', responde que no hay cosecha activa.\n" +
+                            "- Los bloques marcados 'HISTÓRICO' son acumulados de TODAS las " +
+                            "cosechas pasadas y NO representan la cosecha activa actual. " +
+                            "No los confundas: los lotes del histórico NO son los lotes en cosecha hoy.";
 
             // =========================================
             // Prompt usuario
@@ -288,7 +295,7 @@ public class AsistenteIA {
                     daily.getAsJsonArray("weather_code");
 
             StringBuilder clima = new StringBuilder();
-            clima.append("🌤️ CLIMA — Vereda Cordoncillar, Albania\n");
+            clima.append("🌤️ CLIMA — Vereda Cordoncillal, Albania\n");
             clima.append("════════════════════════════════\n\n");
             clima.append("📍 AHORA MISMO:\n");
             clima.append("🌡️ Temperatura: ").append(temp).append("°C\n");

@@ -11,7 +11,10 @@ public class BaseDatos {
     // =========================================
     public void conectar() {
         try {
-            conexion = DriverManager.getConnection("jdbc:sqlite:nufi.db");
+            String carpeta = System.getProperty("user.home") + java.io.File.separator + "NUFI";
+            new java.io.File(carpeta).mkdirs();
+            String rutaDB = carpeta + java.io.File.separator + "nufi.db";
+            conexion = DriverManager.getConnection("jdbc:sqlite:" + rutaDB);
             Statement st = conexion.createStatement();
             st.execute("PRAGMA foreign_keys = ON");
             System.out.println("✅ Base de datos conectada");
@@ -119,13 +122,48 @@ public class BaseDatos {
                     trabajador_id INTEGER,
                     fecha_pago TEXT,
                     total_pagado TEXT,
+                    medio_pago TEXT,
+                    observaciones TEXT,
                     impreso INTEGER DEFAULT 0,
                     FOREIGN KEY (jornada_id) REFERENCES jornadas(id),
                     FOREIGN KEY (trabajador_id) REFERENCES trabajadores(id))
             """);
+            // Migracion: agrega las columnas nuevas si la base ya existia sin ellas.
+            agregarColumnaSiNoExiste("tiquetes", "medio_pago", "TEXT");
+            agregarColumnaSiNoExiste("tiquetes", "observaciones", "TEXT");
             System.out.println("✅ Tabla tiquetes lista");
         } catch (Exception e) {
             System.out.println("❌ Error: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Agrega una columna a una tabla solo si todavia no existe.
+     * Usa PRAGMA table_info (forma canonica y confiable en SQLite) en lugar
+     * de DatabaseMetaData.getColumns(), que en algunas versiones del driver
+     * sqlite-jdbc no aplica el filtro por nombre de columna correctamente.
+     * Sirve para actualizar bases de datos creadas con versiones anteriores
+     * sin perder los datos ya guardados.
+     */
+    private void agregarColumnaSiNoExiste(String tabla, String columna, String tipo) {
+        try {
+            boolean existe = false;
+            try (ResultSet rs = conexion.createStatement()
+                    .executeQuery("PRAGMA table_info(" + tabla + ")")) {
+                while (rs.next()) {
+                    if (columna.equalsIgnoreCase(rs.getString("name"))) {
+                        existe = true;
+                        break;
+                    }
+                }
+            }
+            if (!existe) {
+                conexion.createStatement().execute(
+                        "ALTER TABLE " + tabla + " ADD COLUMN " + columna + " " + tipo);
+                System.out.println("🔧 Columna agregada: " + tabla + "." + columna);
+            }
+        } catch (Exception e) {
+            System.out.println("❌ Error al migrar columna " + columna + ": " + e.getMessage());
         }
     }
 
@@ -242,7 +280,18 @@ public class BaseDatos {
         crearTablaChatHistorial();
         crearUsuariosIniciales();
         crearTrabajadorDuenos();
+        migrarTiquetes();
         System.out.println("✅ Base de datos NUFI inicializada correctamente");
+    }
+
+    /**
+     * Migracion explicita de la tabla tiquetes para bases creadas con
+     * versiones anteriores del sistema (sin columnas medio_pago / observaciones).
+     * Es idempotente: si las columnas ya existen no hace nada.
+     */
+    private void migrarTiquetes() {
+        agregarColumnaSiNoExiste("tiquetes", "medio_pago", "TEXT");
+        agregarColumnaSiNoExiste("tiquetes", "observaciones", "TEXT");
     }
 
     // =========================================
@@ -1027,6 +1076,24 @@ public class BaseDatos {
         }
     }
 
+    /**
+     * Borra todo el historial de chat IA de un usuario. Se usa cuando el
+     * usuario pulsa "Limpiar chat" en el modulo Asistente IA — antes solo
+     * se vaciaba la UI y al recargar volvian los mensajes desde la BD.
+     */
+    public void limpiarHistorialChat(int usuarioId) {
+        try {
+            PreparedStatement ps = conexion.prepareStatement(
+                    "DELETE FROM chat_historial WHERE usuario_id = ?"
+            );
+            ps.setInt(1, usuarioId);
+            int borrados = ps.executeUpdate();
+            System.out.println("🧹 Historial chat borrado | filas: " + borrados);
+        } catch (Exception e) {
+            System.out.println("❌ Error al limpiar historial chat: " + e.getMessage());
+        }
+    }
+
     public void listarChatHistorial(int usuarioId) {
         try {
             PreparedStatement ps = conexion.prepareStatement(
@@ -1181,16 +1248,51 @@ public class BaseDatos {
     public String obtenerContextoReducidoIA() {
         StringBuilder ctx = new StringBuilder();
         ctx.append("FINCA LA QUINTA — Datos clave:\n");
+        ctx.append("Fecha de hoy: ")
+                .append(java.time.LocalDate.now()).append("\n\n");
         try {
-            // Solo cosecha activa
+            // ✅ Cosecha activa (solo en_proceso) y sus lotes reales
             ResultSet rs = conexion.createStatement().executeQuery(
-                    "SELECT nombre, estado FROM cosecha " +
-                            "WHERE estado='en_proceso' LIMIT 1"
+                    "SELECT id, nombre, estado, fecha_inicio FROM cosecha " +
+                            "WHERE estado='en_proceso' " +
+                            "ORDER BY fecha_inicio DESC LIMIT 1"
             );
             if (rs.next()) {
-                ctx.append("Cosecha activa: ")
+                int cosechaActivaId = rs.getInt("id");
+                ctx.append("COSECHA ACTIVA (en proceso):\n");
+                ctx.append("- Nombre: ")
                         .append(rs.getString("nombre")).append("\n");
+                ctx.append("- Fecha inicio: ")
+                        .append(rs.getString("fecha_inicio")).append("\n");
+
+                // Lotes que pertenecen a la cosecha activa
+                PreparedStatement psL = conexion.prepareStatement(
+                        "SELECT l.nombre, cl.estado, " +
+                                "COALESCE(cl.total_cereza_kg,0) as cereza " +
+                                "FROM cosecha_lotes cl " +
+                                "JOIN lotes l ON cl.lote_id=l.id " +
+                                "WHERE cl.cosecha_id=?"
+                );
+                psL.setInt(1, cosechaActivaId);
+                ResultSet rsL = psL.executeQuery();
+                ctx.append("- Lotes en esta cosecha activa:\n");
+                boolean hayLoteActivo = false;
+                while (rsL.next()) {
+                    ctx.append("  • ").append(rsL.getString("nombre"))
+                            .append(" (").append(rsL.getString("estado"))
+                            .append(") — ")
+                            .append(String.format("%.1f", rsL.getDouble("cereza")))
+                            .append(" kg cereza\n");
+                    hayLoteActivo = true;
+                }
+                if (!hayLoteActivo) {
+                    ctx.append("  (sin lotes asignados)\n");
+                }
+            } else {
+                ctx.append("COSECHA ACTIVA: NINGUNA — ");
+                ctx.append("no hay cosechas en proceso actualmente.\n");
             }
+            ctx.append("\n");
 
             // Solo stock bajo
             ResultSet rs2 = conexion.createStatement().executeQuery(
@@ -1225,6 +1327,56 @@ public class BaseDatos {
                                         rs3.getDouble("total")))
                         .append("\n");
             }
+
+            // Kilos cosechados por trabajador (top 10) — incluye historico
+            // para que la IA pueda contestar "quien cosecho mas".
+            ResultSet rs4 = conexion.createStatement().executeQuery(
+                    "SELECT t.nombre, " +
+                            "COALESCE(SUM(j.kilos),0) as kilos, " +
+                            "COUNT(j.id) as jornadas, " +
+                            "COALESCE(SUM(j.total_pagar),0) as pagado " +
+                            "FROM trabajadores t " +
+                            "JOIN jornadas j ON t.id=j.trabajador_id " +
+                            "WHERE j.tipo_trabajo='recoleccion' " +
+                            "GROUP BY t.id " +
+                            "HAVING kilos > 0 " +
+                            "ORDER BY kilos DESC LIMIT 10"
+            );
+            ctx.append("HISTÓRICO recoleccion por trabajador (kg acumulados de TODAS las cosechas):\n");
+            boolean hayCosecha = false;
+            while (rs4.next()) {
+                ctx.append("- ").append(rs4.getString("nombre"))
+                        .append(": ").append(
+                                String.format("%.1f", rs4.getDouble("kilos")))
+                        .append(" kg | jornadas: ").append(rs4.getInt("jornadas"))
+                        .append(" | pagado: $").append(
+                                String.format("%,.0f", rs4.getDouble("pagado")))
+                        .append("\n");
+                hayCosecha = true;
+            }
+            if (!hayCosecha) ctx.append("- sin registros de recoleccion\n");
+
+            // Kilos por lote (top 5) — apoya preguntas tipo
+            // "que lote produjo mas".
+            ResultSet rs5 = conexion.createStatement().executeQuery(
+                    "SELECT l.nombre, COALESCE(SUM(j.kilos),0) as kilos " +
+                            "FROM lotes l " +
+                            "LEFT JOIN jornadas j ON l.id=j.lote_id " +
+                            "AND j.tipo_trabajo='recoleccion' " +
+                            "GROUP BY l.id, l.nombre " +
+                            "HAVING kilos > 0 " +
+                            "ORDER BY kilos DESC LIMIT 5"
+            );
+            ctx.append("HISTÓRICO recoleccion por lote (kg acumulados de TODAS las cosechas — NO son lotes de la cosecha activa):\n");
+            boolean hayLote = false;
+            while (rs5.next()) {
+                ctx.append("- ").append(rs5.getString("nombre"))
+                        .append(": ").append(
+                                String.format("%.1f", rs5.getDouble("kilos")))
+                        .append(" kg\n");
+                hayLote = true;
+            }
+            if (!hayLote) ctx.append("- sin registros\n");
         } catch (Exception e) {
             System.out.println("❌ Contexto reducido: " + e.getMessage());
         }

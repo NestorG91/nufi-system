@@ -84,6 +84,16 @@
             </VBox>
         </HBox>
 
+        <HBox spacing="12">
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label text="Medio de pago:"/>
+                <ComboBox fx:id="cmbMedioPago"
+                          promptText="Efectivo, Transferencia, Nequi..."
+                          maxWidth="Infinity"
+                          styleClass="nufi-input"/>
+            </VBox>
+        </HBox>
+
         <!-- Jornadas pendientes de pago -->
         <Label text="Jornadas pendientes de pago:"
                style="-fx-font-weight:bold;"/>
@@ -97,6 +107,15 @@
                    text="0"
                    style="-fx-font-weight:bold; -fx-font-size:18px; -fx-text-fill:#2d6a4f;"/>
         </HBox>
+
+        <VBox spacing="4">
+            <Label text="Observaciones (medio de pago, notas):"/>
+            <TextArea fx:id="txtObservaciones"
+                      promptText="Ej: Pago por Nequi al 300 123 4567"
+                      prefRowCount="2"
+                      wrapText="true"
+                      styleClass="nufi-input"/>
+        </VBox>
 
         <Label fx:id="lblError"
                styleClass="label-error"

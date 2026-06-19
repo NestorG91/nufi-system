@@ -6,7 +6,8 @@
 <VBox xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.nufi.ui.controllers.DetalleTiqueteController"
-      prefWidth="380" prefHeight="580"
+      fx:id="raizTiquete"
+      prefWidth="380" prefHeight="700"
       style="-fx-background-color: white;">
 
     <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
@@ -16,7 +17,7 @@
           style="-fx-border-color:#2d6a4f; -fx-border-width:2; -fx-border-radius:8; -fx-background-color:#f8f9fa; -fx-background-radius:8; -fx-padding:16;">
         <Label text="☕ FINCA LA QUINTA"
                style="-fx-font-size:18px; -fx-font-weight:bold; -fx-text-fill:#2d6a4f;"/>
-        <Label text="Vereda Cordoncillar"
+        <Label text="Vereda Cordoncillal"
                style="-fx-font-size:12px; -fx-text-fill:#555;"/>
         <Label text="Albania, Santander, Colombia"
                style="-fx-font-size:12px; -fx-text-fill:#555;"/>
@@ -81,6 +82,23 @@
                    style="-fx-text-fill:#333;"/>
         </HBox>
 
+        <HBox spacing="8">
+            <Label text="💵 Medio de pago:"
+                   style="-fx-font-weight:bold; -fx-min-width:130;"/>
+            <Label fx:id="lblMedioPago"
+                   text="—"
+                   style="-fx-text-fill:#333;"/>
+        </HBox>
+
+        <VBox fx:id="panelObservaciones" spacing="2">
+            <Label text="📝 Observaciones:"
+                   style="-fx-font-weight:bold;"/>
+            <Label fx:id="lblObservaciones"
+                   text="—"
+                   wrapText="true"
+                   style="-fx-text-fill:#333;"/>
+        </VBox>
+
     </VBox>
 
     <Separator style="-fx-padding:4 0;"/>
@@ -116,9 +134,15 @@
                style="-fx-font-size:10px; -fx-text-fill:#aaa;"/>
     </VBox>
 
-    <!-- ══ BOTÓN CERRAR ══ -->
+    <!-- ══ BOTONES ══ -->
     <HBox alignment="CENTER" spacing="8"
           style="-fx-padding:12 0 0 0;">
+        <Button text="🖨 Imprimir"
+                styleClass="btn-primary"
+                onAction="#imprimir"/>
+        <Button text="⬇ Descargar PDF"
+                styleClass="btn-primary"
+                onAction="#descargarPdf"/>
         <Button text="✖ Cerrar"
                 styleClass="btn-secondary"
                 onAction="#cerrar"/>

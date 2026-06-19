@@ -23,17 +23,14 @@ public class AsistenteIAController {
 
     @FXML
     public void initialize() {
-        new Thread(() -> {
-            climaActual = ia.obtenerClimaActual();
-            Platform.runLater(() -> {
-                agregarMensajeIA(
-                        "¡Hola! Soy NUFI IA ☕\n\n" +
-                                climaActual + "\n" +
-                                "¿En qué te puedo ayudar hoy?"
-                );
-                cargarHistorial();
-            });
-        }, "nufi-clima-thread").start();
+        // ✅ Bienvenida inmediata sin consultar el clima (ahorra créditos
+        //    y evita la espera). El clima se pide solo con el botón rápido.
+        agregarMensajeIA(
+                "¡Hola! Soy NUFI IA ☕\n" +
+                        "¿En qué te puedo ayudar hoy?\n\n" +
+                        "Usa el botón \"☀ ¿Clima hoy?\" si necesitas el pronóstico."
+        );
+        cargarHistorial();
     }
 
     private void cargarHistorial() {
@@ -89,14 +86,14 @@ public class AsistenteIAController {
             return;
         }
 
-        // ✅ Claude API con resumen corto del clima
+        // ✅ Claude API — el clima solo se adjunta si el usuario lo cargó
+        //    explícitamente con el botón rápido (ahorra tokens en cada pregunta).
         new Thread(() -> {
             int usuarioId = SesionUsuario.getUsuario() != null ?
                     SesionUsuario.getUsuario().id : 1;
 
-            String preguntaConClima = pregunta;
+            String preguntaFinal = pregunta;
             if (!climaActual.isEmpty()) {
-                // ✅ Solo líneas clave del clima
                 String climaResumen = climaActual
                         .lines()
                         .filter(l -> l.contains("Temperatura") ||
@@ -107,14 +104,14 @@ public class AsistenteIAController {
                         .limit(6)
                         .reduce("", (a, b) -> a + b + "\n");
 
-                preguntaConClima =
+                preguntaFinal =
                         "CLIMA HOY EN LA FINCA (Albania, Santander):\n" +
                                 climaResumen + "\n" +
                                 "PREGUNTA:\n" + pregunta;
             }
 
             String respuesta = ia.preguntarConDatos(
-                    preguntaConClima, db, usuarioId);
+                    preguntaFinal, db, usuarioId);
             Platform.runLater(() -> {
                 mostrarEscribiendo(false);
                 agregarMensajeIA(respuesta);
@@ -198,14 +195,24 @@ public class AsistenteIAController {
     private void limpiarChat() {
         Alert confirm = new Alert(
                 Alert.AlertType.CONFIRMATION,
-                "¿Limpiar el historial del chat?",
+                "¿Limpiar el historial del chat? Esta accion borra " +
+                        "tambien las conversaciones guardadas en la base de datos.",
                 ButtonType.YES, ButtonType.NO
         );
         confirm.setTitle("Limpiar chat");
         confirm.setHeaderText(null);
         confirm.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.YES) {
+                // 1) Limpiar UI
                 contenedorMensajes.getChildren().clear();
+
+                // 2) Borrar historial persistente en BD para que al volver a
+                //    entrar al modulo no se recargue la conversacion anterior.
+                if (SesionUsuario.getUsuario() != null) {
+                    db.limpiarHistorialChat(SesionUsuario.getUsuario().id);
+                }
+
+                // 3) Mensaje de bienvenida nuevo
                 agregarMensajeIA(
                         "Chat limpiado. ¡Hola de nuevo! ☕\n" +
                                 "¿En qué te puedo ayudar?"
@@ -239,6 +246,7 @@ public class AsistenteIAController {
         mostrarEscribiendo(true);
         new Thread(() -> {
             String clima = ia.obtenerClimaActual();
+            climaActual = clima; // ✅ se cachea para preguntas posteriores
             Platform.runLater(() -> {
                 mostrarEscribiendo(false);
                 agregarMensajeIA(clima);

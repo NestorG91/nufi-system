@@ -1,6 +1,7 @@
 package com.nufi.ui.controllers;
 
 import com.nufi.*;
+import com.nufi.ui.LoadingUtil;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -483,6 +484,35 @@ public class CosechaController {
             System.out.println("❌ " + e.getMessage());
         }
 
+        // ✅ Cosecha TERMINADA → permitir reactivar
+        if ("terminado".equals(estadoActual)) {
+            Alert confirm = new Alert(
+                    Alert.AlertType.CONFIRMATION,
+                    "Esta cosecha está TERMINADA.\n" +
+                            "¿Deseas REACTIVARLA y ponerla en proceso?",
+                    ButtonType.YES, ButtonType.NO
+            );
+            confirm.setTitle("Reactivar cosecha");
+            confirm.setHeaderText("Cosecha: " + nombre);
+            confirm.showAndWait().ifPresent(btn -> {
+                if (btn == ButtonType.YES) {
+                    LoadingUtil.ejecutar(
+                            tablaCosechas,
+                            "Reactivando cosecha...",
+                            () -> cambiarEstadoCosecha(cosechaId, "en_proceso"),
+                            () -> {
+                                new Alert(Alert.AlertType.INFORMATION,
+                                        "✅ Cosecha reactivada — ahora está en proceso.")
+                                        .showAndWait();
+                                cargarCosechas();
+                            }
+                    );
+                }
+            });
+            return;
+        }
+
+        // ✅ Cosecha EN ESPERA → reactivar o cerrar
         if ("en_espera".equals(estadoActual)) {
             ChoiceDialog<String> dialog = new ChoiceDialog<>(
                     "Reactivar cosecha",
@@ -495,99 +525,136 @@ public class CosechaController {
 
             dialog.showAndWait().ifPresent(opcion -> {
                 if (opcion.equals("Reactivar cosecha")) {
-                    cambiarEstadoCosecha(cosechaId, "en_proceso");
-                    new Alert(Alert.AlertType.INFORMATION,
-                            "Cosecha reactivada — en proceso.")
-                            .showAndWait();
+                    LoadingUtil.ejecutar(
+                            tablaCosechas,
+                            "Reactivando cosecha...",
+                            () -> cambiarEstadoCosecha(cosechaId, "en_proceso"),
+                            () -> {
+                                new Alert(Alert.AlertType.INFORMATION,
+                                        "✅ Cosecha reactivada — en proceso.")
+                                        .showAndWait();
+                                cargarCosechas();
+                            }
+                    );
                 } else {
-                    pedirPrecioYCerrar(cosechaId);
+                    pedirPrecioYCerrar(cosechaId, nombre);
                 }
-                cargarCosechas();
             });
-
-        } else {
-            ChoiceDialog<String> dialog = new ChoiceDialog<>(
-                    "Poner en espera",
-                    "Poner en espera",
-                    "Cerrar definitivamente"
-            );
-            dialog.setTitle("Cambiar estado");
-            dialog.setHeaderText("Cosecha: " + nombre);
-            dialog.setContentText("¿Qué deseas hacer?");
-
-            dialog.showAndWait().ifPresent(opcion -> {
-                if (opcion.equals("Poner en espera")) {
-                    cambiarEstadoCosecha(cosechaId, "en_espera");
-                    new Alert(Alert.AlertType.INFORMATION,
-                            "Cosecha en espera.")
-                            .showAndWait();
-                } else {
-                    pedirPrecioYCerrar(cosechaId);
-                }
-                cargarCosechas();
-            });
+            return;
         }
+
+        // ✅ Cosecha EN PROCESO → cerrar (con opción de poner en espera)
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(
+                "Cerrar definitivamente",
+                "Cerrar definitivamente",
+                "Poner en espera"
+        );
+        dialog.setTitle("Cerrar cosecha");
+        dialog.setHeaderText("Cosecha: " + nombre);
+        dialog.setContentText("¿Qué deseas hacer?");
+
+        dialog.showAndWait().ifPresent(opcion -> {
+            if (opcion.equals("Poner en espera")) {
+                LoadingUtil.ejecutar(
+                        tablaCosechas,
+                        "Actualizando estado...",
+                        () -> cambiarEstadoCosecha(cosechaId, "en_espera"),
+                        () -> {
+                            new Alert(Alert.AlertType.INFORMATION,
+                                    "Cosecha en espera.")
+                                    .showAndWait();
+                            cargarCosechas();
+                        }
+                );
+            } else {
+                pedirPrecioYCerrar(cosechaId, nombre);
+            }
+        });
     }
 
-    private void pedirPrecioYCerrar(int cosechaId) {
+    private void pedirPrecioYCerrar(int cosechaId, String nombre) {
         TextInputDialog dialogPerg = new TextInputDialog("0");
         dialogPerg.setTitle("Peso real de pergamino");
         dialogPerg.setHeaderText(
-                "Ingresa el peso REAL del pergamino obtenido:");
+                "Cosecha: " + nombre + "\n" +
+                        "Ingresa el peso REAL del pergamino obtenido:");
         dialogPerg.setContentText("Pergamino real (kg):");
 
-        dialogPerg.showAndWait().ifPresent(pergStr -> {
+        java.util.Optional<String> respPerg = dialogPerg.showAndWait();
+        if (respPerg.isEmpty()) {
+            // ✅ Usuario cancela → no se cierra
+            return;
+        }
+
+        double pergReal;
+        try {
+            pergReal = Double.parseDouble(respPerg.get().trim());
+        } catch (NumberFormatException e) {
+            new Alert(Alert.AlertType.ERROR,
+                    "Ingresa un peso válido.")
+                    .showAndWait();
+            return;
+        }
+
+        try {
+            PreparedStatement ps = db.getConexion()
+                    .prepareStatement(
+                            "UPDATE cosecha_lotes " +
+                                    "SET pergamino_real_kg=? " +
+                                    "WHERE cosecha_id=?"
+                    );
+            ps.setDouble(1, pergReal);
+            ps.setInt(2, cosechaId);
+            ps.executeUpdate();
+        } catch (java.sql.SQLException ex) {
+            System.out.println("❌ SQL: " + ex.getMessage());
+        }
+
+        TextInputDialog dialogPrecio = new TextInputDialog("0");
+        dialogPrecio.setTitle("Valor de venta");
+        dialogPrecio.setHeaderText(
+                "¿Cuál fue el valor pagado por CARGA?\n" +
+                        "(1 carga = 125 kg de pergamino)\n" +
+                        "Puedes dejar 0 si aún no lo sabes.");
+        dialogPrecio.setContentText("Valor por carga $:");
+
+        java.util.Optional<String> respPrecio = dialogPrecio.showAndWait();
+
+        double precioPorKilo = 0;
+        if (respPrecio.isPresent()) {
             try {
-                double pergReal = Double.parseDouble(pergStr.trim());
-
-                try {
-                    PreparedStatement ps = db.getConexion()
-                            .prepareStatement(
-                                    "UPDATE cosecha_lotes " +
-                                            "SET pergamino_real_kg=? " +
-                                            "WHERE cosecha_id=?"
-                            );
-                    ps.setDouble(1, pergReal);
-                    ps.setInt(2, cosechaId);
-                    ps.executeUpdate();
-                } catch (java.sql.SQLException ex) {
-                    System.out.println("❌ SQL: " + ex.getMessage());
-                }
-
-                TextInputDialog dialogPrecio =
-                        new TextInputDialog("0");
-                dialogPrecio.setTitle("Valor de venta");
-                dialogPrecio.setHeaderText(
-                        "¿Cuál fue el valor pagado por CARGA?\n" +
-                                "(1 carga = 125 kg de pergamino)");
-                dialogPrecio.setContentText("Valor por carga $:");
-
-                dialogPrecio.showAndWait().ifPresent(precioStr -> {
-                    try {
-                        double valorCarga = Double.parseDouble(
-                                precioStr.trim());
-                        double precioPorKilo = valorCarga / 125.0;
-                        cambiarEstadoCosecha(cosechaId, "terminado");
-                        guardarPrecioVenta(cosechaId, precioPorKilo);
-                        new Alert(Alert.AlertType.INFORMATION,
-                                "Cosecha cerrada.\n" +
-                                        "Pergamino real: " + pergReal + " kg\n" +
-                                        "Precio kilo: $" +
-                                        String.format("%,.0f", precioPorKilo))
-                                .showAndWait();
-                    } catch (NumberFormatException e) {
-                        new Alert(Alert.AlertType.ERROR,
-                                "Ingresa un valor válido.")
-                                .showAndWait();
-                    }
-                });
-
+                double valorCarga = Double.parseDouble(respPrecio.get().trim());
+                precioPorKilo = valorCarga / 125.0;
             } catch (NumberFormatException e) {
-                new Alert(Alert.AlertType.ERROR,
-                        "Ingresa un peso válido.")
-                        .showAndWait();
+                precioPorKilo = 0;
             }
-        });
+        }
+
+        // ✅ SIEMPRE cerrar la cosecha aunque no se haya ingresado precio.
+        //    Muestra un reloj mientras se actualiza la BD.
+        final double precioFinal = precioPorKilo;
+        final double pergFinal   = pergReal;
+        LoadingUtil.ejecutar(
+                tablaCosechas,
+                "Cerrando cosecha...",
+                () -> {
+                    cambiarEstadoCosecha(cosechaId, "terminado");
+                    if (precioFinal > 0) {
+                        guardarPrecioVenta(cosechaId, precioFinal);
+                    }
+                },
+                () -> {
+                    new Alert(Alert.AlertType.INFORMATION,
+                            "✅ Cosecha cerrada.\n" +
+                                    "Pergamino real: " + pergFinal + " kg\n" +
+                                    (precioFinal > 0
+                                            ? "Precio kilo: $" +
+                                            String.format("%,.0f", precioFinal)
+                                            : "(Sin precio registrado)"))
+                            .showAndWait();
+                    cargarCosechas();
+                }
+        );
     }
 
     private void cambiarEstadoCosecha(int cosechaId, String estado) {
@@ -595,6 +662,8 @@ public class CosechaController {
             PreparedStatement ps = db.getConexion().prepareStatement(
                     "UPDATE cosecha SET estado=?, fecha_fin=? WHERE id=?"
             );
+            // ✅ Solo guardar fecha_fin si la cosecha se termina.
+            //    Al reactivar (en_proceso) o poner en espera, fecha_fin=null.
             String fecha = estado.equals("terminado") ?
                     LocalDate.now().toString() : null;
             ps.setString(1, estado);
@@ -608,6 +677,9 @@ public class CosechaController {
             ps2.setString(1, estado);
             ps2.setInt(2, cosechaId);
             ps2.executeUpdate();
+
+            System.out.println("✅ Cosecha " + cosechaId +
+                    " → estado: " + estado);
         } catch (Exception e) {
             System.out.println("❌ Error estado: " + e.getMessage());
         }
